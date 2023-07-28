@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\vendor">
+      <UniqueIdentifier>{d28be3c2-299e-4ae2-b700-52df5fbcde74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{d5d5d037-91be-40c8-9782-5b0f1b475525}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vendor\imgui">
+      <UniqueIdentifier>{01fe6031-388c-4769-9119-a4af6d65a37b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vendor">
+      <UniqueIdentifier>{9d01f151-7628-4643-8328-d1d10bb03d53}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="UnseenEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileBrowser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\imgui.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\imgui_demo.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\imgui_draw.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\backends\imgui_impl_glfw.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\backends\imgui_impl_vulkan.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\imgui_tables.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUI\imgui_widgets.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Models.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUIZMO\GraphEditor.cpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUIZMO\ImCurveEdit.cpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUIZMO\ImGradient.cpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUIZMO\ImGuizmo.cpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendors\IMGUIZMO\ImSequencer.cpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineUIFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenXR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="implot_items.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="implot.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="implot_demo.cpp">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\frag.spv">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\vert.spv">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EngineUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnseenEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileBrowser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imstb_truetype.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imconfig.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imgui.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imgui_internal.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imstb_rectpack.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUI\imstb_textedit.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\TINYGLTF\json.hpp">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\TINYGLTF\stb_image.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\TINYGLTF\stb_image_write.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\TINYGLTF\tiny_gltf.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Models.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\GraphEditor.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\ImCurveEdit.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\ImGradient.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\ImGuizmo.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\ImSequencer.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendors\IMGUIZMO\ImZoomSlider.h">
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineUIFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenXR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="implot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="implot_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

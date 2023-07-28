@@ -1,0 +1,13 @@
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/CMakeFiles/uninstall.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/CMakeFiles/INSTALL.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/CMakeFiles/ALL_BUILD.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/CMakeFiles/ZERO_CHECK.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/code/CMakeFiles/assimp.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/code/CMakeFiles/INSTALL.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/test/CMakeFiles/unit.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/test/CMakeFiles/INSTALL.dir
+C:/Users/jaken/Perforce/jakenicolaides_StudioPC/UnseenEngine/Vendors/ASSIMP/test/headercheck/CMakeFiles/INSTALL.dir
