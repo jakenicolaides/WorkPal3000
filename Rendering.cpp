@@ -328,7 +328,6 @@ namespace Rendering {
             updateCamera(window, deltaTime);
 
 
-
             //imgui new frame
             if (!isPlayingGame) {
                 ImGui_ImplVulkan_NewFrame();
