@@ -5,9 +5,6 @@
 #include <fstream>
 #include <glfw3.h>
 #include <optional>
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_ENABLE_EXPERIMENTAL
@@ -16,7 +13,6 @@
 #include <vector>
 #include <map>
 #define XR_USE_GRAPHICS_API_VULKAN
-#include <openxr/openxr.h>
 
 
 namespace Rendering {

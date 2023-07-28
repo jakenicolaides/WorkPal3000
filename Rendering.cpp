@@ -12,8 +12,6 @@
 #include <vector>
 #include <iostream>
 #include "EngineUI.h"
-#include "Data.h"
-#include "imguizmo.h"
 
 static const int numEntities = 100;
 
@@ -26,7 +24,7 @@ struct Entities {
 };
 
 #define VMA_IMPLEMENTATION
-#include "vk_mem_alloc.h"
+//#include "vk_mem_alloc.h"
 
 //#define STB_IMAGE_IMPLEMENTATION
 //#include <stb_image.h>
@@ -41,7 +39,7 @@ struct Entities {
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
-#include "tiny_gltf.h"
+//#include "tiny_gltf.h"
 
 namespace Rendering {
 
@@ -53,8 +51,8 @@ namespace Rendering {
         uint32_t index[numEntities];
         VkDeviceMemory indexBufferMemory[numEntities];
         VkDeviceMemory vertexBufferMemory[numEntities];
-        VmaAllocation vertexAllocation[numEntities];
-        VmaAllocation indexAllocation[numEntities];
+        //VmaAllocation vertexAllocation[numEntities];
+       // VmaAllocation indexAllocation[numEntities];
         std::vector<VkDescriptorSet> descriptorSets[numEntities];
     };
 
@@ -121,7 +119,7 @@ namespace Rendering {
     bool firstMouse = true;
     bool framebufferResized = false;
     //VMA
-    VmaAllocator vmaAllocator;
+    //VmaAllocator vmaAllocator;
     //Mouse
     bool isObjectPicking = false;
     bool isViewportHovered = false;
@@ -235,7 +233,6 @@ namespace Rendering {
         createColorResources();
         createDepthResources();
         createFramebuffers();
-        createVulkanMemoryAllocator();
         createUniformBuffers();
         createDescriptorPool();
         createCommandBuffers();
@@ -325,13 +322,12 @@ namespace Rendering {
 
             //editor camera controls
             
-                double currentTime = glfwGetTime();
-                double deltaTime = currentTime - lastTime;
-                lastTime = currentTime;
-                updateCamera(window, deltaTime);
+            double currentTime = glfwGetTime();
+            double deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            updateCamera(window, deltaTime);
 
 
-            objectPicker();
 
             //imgui new frame
             if (!isPlayingGame) {
@@ -1481,11 +1477,6 @@ namespace Rendering {
         uint32_t imageIndex;
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        //Update swapchains
-        /**
-        if (isPlayingGame) {
-            updateOpenXRSwapchainImages(OpenXR::session, OpenXR::xrSwapchain, &imageIndex); } else { 
-            */
         ImGui::Render();
 
 
@@ -1787,248 +1778,7 @@ namespace Rendering {
             abort();
     }
 
-    // Helper function to load an image with common settings and return a MyTextureData with a VkDescriptorSet as a sort of Vulkan pointer
-    bool LoadTextureFromFile(const char* filename, ImGuiTextureData* tex_data)
-    {
-        // Specifying 4 channels forces stb to load the image in RGBA which is an easy format for Vulkan
-        tex_data->Channels = 4;
-        unsigned char* image_data = stbi_load(filename, &tex_data->Width, &tex_data->Height, 0, tex_data->Channels);
-
-        if (image_data == NULL)
-            return false;
-
-        // Calculate allocation size (in number of bytes)
-        size_t image_size = tex_data->Width * tex_data->Height * tex_data->Channels;
-
-        VkResult err;
-
-        VkAllocationCallbacks* allocator = nullptr;
-
-        // Create the Vulkan image.
-        {
-            VkImageCreateInfo info = {};
-            info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-            info.imageType = VK_IMAGE_TYPE_2D;
-            info.format = VK_FORMAT_R8G8B8A8_UNORM;
-            info.extent.width = tex_data->Width;
-            info.extent.height = tex_data->Height;
-            info.extent.depth = 1;
-            info.mipLevels = 1;
-            info.arrayLayers = 1;
-            info.samples = VK_SAMPLE_COUNT_1_BIT;
-            info.tiling = VK_IMAGE_TILING_OPTIMAL;
-            info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-            info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            err = vkCreateImage(device, &info, allocator, &tex_data->Image);
-            check_vk_result(err);
-            VkMemoryRequirements req;
-            vkGetImageMemoryRequirements(device, tex_data->Image, &req);
-            VkMemoryAllocateInfo alloc_info = {};
-            alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            alloc_info.allocationSize = req.size;
-            alloc_info.memoryTypeIndex = findMemoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-            err = vkAllocateMemory(device, &alloc_info, allocator, &tex_data->ImageMemory);
-            check_vk_result(err);
-            err = vkBindImageMemory(device, tex_data->Image, tex_data->ImageMemory, 0);
-            check_vk_result(err);
-        }
-
-        // Create the Image View
-        {
-            VkImageViewCreateInfo info = {};
-            info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            info.image = tex_data->Image;
-            info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            info.format = VK_FORMAT_R8G8B8A8_UNORM;
-            info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            info.subresourceRange.levelCount = 1;
-            info.subresourceRange.layerCount = 1;
-            err = vkCreateImageView(device, &info, allocator, &tex_data->ImageView);
-            check_vk_result(err);
-        }
-
-        // Create Sampler
-        {
-            VkSamplerCreateInfo sampler_info{};
-            sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-            sampler_info.magFilter = VK_FILTER_LINEAR;
-            sampler_info.minFilter = VK_FILTER_LINEAR;
-            sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-            sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT; // outside image bounds just use border color
-            sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            sampler_info.minLod = -1000;
-            sampler_info.maxLod = 1000;
-            sampler_info.maxAnisotropy = 1.0f;
-            err = vkCreateSampler(device, &sampler_info, allocator, &tex_data->Sampler);
-            check_vk_result(err);
-        }
-
-        // Create Descriptor Set using ImGUI's implementation
-        tex_data->DS = ImGui_ImplVulkan_AddTexture(tex_data->Sampler, tex_data->ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-        // Create Upload Buffer
-        {
-            VkBufferCreateInfo buffer_info = {};
-            buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            buffer_info.size = image_size;
-            buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            err = vkCreateBuffer(device, &buffer_info, allocator, &tex_data->UploadBuffer);
-            check_vk_result(err);
-            VkMemoryRequirements req;
-            vkGetBufferMemoryRequirements(device, tex_data->UploadBuffer, &req);
-            VkMemoryAllocateInfo alloc_info = {};
-            alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            alloc_info.allocationSize = req.size;
-            alloc_info.memoryTypeIndex = findMemoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-            err = vkAllocateMemory(device, &alloc_info, allocator, &tex_data->UploadBufferMemory);
-            check_vk_result(err);
-            err = vkBindBufferMemory(device, tex_data->UploadBuffer, tex_data->UploadBufferMemory, 0);
-            check_vk_result(err);
-        }
-
-        // Upload to Buffer:
-        {
-            void* map = NULL;
-            err = vkMapMemory(device, tex_data->UploadBufferMemory, 0, image_size, 0, &map);
-            check_vk_result(err);
-            memcpy(map, image_data, image_size);
-            VkMappedMemoryRange range[1] = {};
-            range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            range[0].memory = tex_data->UploadBufferMemory;
-            range[0].size = image_size;
-            err = vkFlushMappedMemoryRanges(device, 1, range);
-            check_vk_result(err);
-            vkUnmapMemory(device, tex_data->UploadBufferMemory);
-        }
-
-        // Release image memory using stb
-        stbi_image_free(image_data);
-
-        // Create a command buffer that will perform following steps when hit in the command queue.
-        // TODO: this works in the example, but may need input if this is an acceptable way to access the pool/create the command buffer.
-        //VkCommandPool command_pool = _window.Frames[g_MainWindowData.FrameIndex].CommandPool;
-        VkCommandBuffer command_buffer;
-        {
-            VkCommandBufferAllocateInfo alloc_info{};
-            alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            alloc_info.commandPool = commandPool;
-            alloc_info.commandBufferCount = 1;
-
-            err = vkAllocateCommandBuffers(device, &alloc_info, &command_buffer);
-            check_vk_result(err);
-
-            VkCommandBufferBeginInfo begin_info = {};
-            begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            err = vkBeginCommandBuffer(command_buffer, &begin_info);
-            check_vk_result(err);
-        }
-
-        // Copy to Image
-        {
-            VkImageMemoryBarrier copy_barrier[1] = {};
-            copy_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-            copy_barrier[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            copy_barrier[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            copy_barrier[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            copy_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            copy_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            copy_barrier[0].image = tex_data->Image;
-            copy_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copy_barrier[0].subresourceRange.levelCount = 1;
-            copy_barrier[0].subresourceRange.layerCount = 1;
-            vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, copy_barrier);
-
-            VkBufferImageCopy region = {};
-            region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            region.imageSubresource.layerCount = 1;
-            region.imageExtent.width = tex_data->Width;
-            region.imageExtent.height = tex_data->Height;
-            region.imageExtent.depth = 1;
-            vkCmdCopyBufferToImage(command_buffer, tex_data->UploadBuffer, tex_data->Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-            VkImageMemoryBarrier use_barrier[1] = {};
-            use_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-            use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            use_barrier[0].image = tex_data->Image;
-            use_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            use_barrier[0].subresourceRange.levelCount = 1;
-            use_barrier[0].subresourceRange.layerCount = 1;
-            vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, use_barrier);
-        }
-
-        // End command buffer
-        {
-            VkSubmitInfo end_info = {};
-            end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            end_info.commandBufferCount = 1;
-            end_info.pCommandBuffers = &command_buffer;
-            err = vkEndCommandBuffer(command_buffer);
-            check_vk_result(err);
-            err = vkQueueSubmit(graphicsQueue, 1, &end_info, VK_NULL_HANDLE);
-            check_vk_result(err);
-            err = vkDeviceWaitIdle(device);
-            check_vk_result(err);
-        }
-
-        return true;
-    }
-
-    // Helper function to cleanup an image loaded with LoadTextureFromFile
-    void RemoveTexture(ImGuiTextureData* tex_data)
-    {
-   
-
-        if (tex_data->UploadBufferMemory) {
-            vkFreeMemory(device, tex_data->UploadBufferMemory, nullptr);
-            tex_data->UploadBufferMemory = nullptr;
-        }
-
-        if (tex_data->UploadBuffer) {
-            vkDestroyBuffer(device, tex_data->UploadBuffer, nullptr);
-            tex_data->UploadBuffer = VK_NULL_HANDLE;
-        }
-
-        if (tex_data->Sampler) {
-            vkDestroySampler(device, tex_data->Sampler, nullptr);
-            tex_data->Sampler = VK_NULL_HANDLE;
-        }
-
-        if (tex_data->ImageMemory) {
-            vkFreeMemory(device, tex_data->ImageMemory, nullptr);
-            tex_data->ImageMemory = nullptr;
-        }
-
-        if (tex_data->Image) {
-            vkDestroyImage(device, tex_data->Image, nullptr);
-            tex_data->Image = VK_NULL_HANDLE;
-        }
-
-        if (tex_data->ImageView) {
-            vkDestroyImageView(device, tex_data->ImageView, nullptr);
-            tex_data->ImageView = VK_NULL_HANDLE;
-        }
-
-        if (tex_data->DS) {
-            // You'll need to know how the descriptor set was allocated to properly free it
-            // For example, if it was allocated from a descriptor pool, you'll need to return it to the pool
-            // If it was allocated from an allocator, you'll need to deallocate it from the allocator
-            // Here, we're assuming it was allocated from a pool and we're returning it to the pool
-            ImGui_ImplVulkan_RemoveTexture(tex_data->DS);
-            tex_data->DS = VK_NULL_HANDLE;
-        }
-     
-    
-    }
+  
 
     void updateCamera(GLFWwindow* window, float deltaTime)
     {
@@ -2099,244 +1849,7 @@ namespace Rendering {
 
 
 
-    /*
-
-
-    From here on out the following functions and code are adaptions of the code from Vulkan Tutorial by Alexander Overvoorde.
-    Eventually I will remove all the tutorial functions and replace them with my own, as and when they need to be replaced by something more advanced.
-
-    */
-
-    void createVulkanMemoryAllocator() {
-
-        VmaAllocatorCreateInfo allocatorInfo{};
-        allocatorInfo.device = device;
-        allocatorInfo.physicalDevice = physicalDevice;
-        allocatorInfo.instance = instance;
-
-        vmaCreateAllocator(&allocatorInfo, &vmaAllocator);
-    }
-
-    VkImage createTextureImage(std::string textureName, std::string modelPath) {
-
-        int texWidth, texHeight, texChannels;
-        stbi_uc* pixels;
-        std::string pathString = "";
-
-   
-        pixels = stbi_load(pathString.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     
-
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
-  
-        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-
-        if (pixels == NULL) {
-            printf("Failed to load texture: %s\n", stbi_failure_reason());
-        }
-
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-        void* data;
-        vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
-        memcpy(data, pixels, static_cast<size_t>(imageSize));
-        vkUnmapMemory(device, stagingBufferMemory);
-
-        stbi_image_free(pixels);
-
-        createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
-        transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
-        copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-        //transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
-
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingBufferMemory, nullptr);
-
-        generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
-
-        return textureImage;
-    }
-
-    VkSampler createTextureSampler() {
-
-        VkSampler textureSampler;
-        VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-
-        VkSamplerCreateInfo samplerInfo{};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.anisotropyEnable = VK_TRUE;
-        samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        samplerInfo.minLod = 0.0f;
-        samplerInfo.maxLod = static_cast<float>(mipLevels);
-        samplerInfo.mipLodBias = 0.0f;
-
-        if (vkCreateSampler(device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture sampler!");
-        }
-        else {
-            return textureSampler;
-        }
-    }
-
-    
-
-    //TODO:
-    // (1) Create/load bounding boxes for all our meshes and store them in the rendered models array
-    // (2) calcualte the postion of the mouse and fire a ray from that position
-    // (2) check to see if the ray intersects with any of the bounding boxes of any of the meshes in our scene
-    // (3) if it does, then check to make sure it actually overlaps with a triangle of that mesh
-    
-    void objectPicker() {
-       
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !isObjectPicking) {
-            
-            return;
-            isObjectPicking = true;
-
-            // Get the cursor position in screen space
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
-            int width, height;
-            glfwGetFramebufferSize(window, &width, &height);
-
-            // Transform the cursor position to NDC space
-            glm::vec2 ndcPos = glm::vec2((2.0f * xpos) / width - 1.0f, 1.0f - (2.0f * ypos) / height);
-            glm::vec4 rayClip = glm::vec4(ndcPos.x, ndcPos.y, -1.0f, 1.0f);
-
-            // Transform the NDC space coordinates to world space
-            glm::mat4 invProjMatrix = glm::inverse(ubo.proj);
-            glm::vec4 rayEye = invProjMatrix * rayClip;
-            rayEye = glm::vec4(rayEye.x, rayEye.y, 1.0f, 0.0f);
-            glm::mat4 invViewMatrix = glm::inverse(ubo.view);
-            glm::vec4 rayWorld = invViewMatrix * rayEye;
-
-            // Set the ray origin to the cursor position in world space
-            glm::vec3 rayOrigin = glm::vec3(rayWorld);
-
-            /*
-            // Convert mouse position to NDC
-            glm::vec2 ndcPos = glm::vec2((2.0f * xpos) / width - 1.0f, 1.0f - (2.0f * ypos) / height);
-            glm::vec4 rayClip = glm::vec4(ndcPos.x, ndcPos.y, -1.0f, 1.0f);
-            glm::mat4 projMatrix = ubo.proj;
-            glm::mat4 invProjMatrix = glm::inverse(projMatrix);
-            glm::vec4 rayEye = invProjMatrix * rayClip;
-            rayEye = glm::vec4(rayEye.x, rayEye.y, 1.0f, 0.0f);
-            glm::mat4 viewMatrix = ubo.view;
-            glm::mat4 invViewMatrix = glm::inverse(viewMatrix);
-            glm::vec4 rayWorld = invViewMatrix * rayEye;
-            */
-            glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld.x, rayWorld.y, -rayWorld.z));
-           // glm::vec3 rayOrigin = cameraPosition;
-            
-            
-      
-
-            // Perform intersection tests
-            int foundIntersects = 0;
-            int numModels = sizeof(renderedModels.id) / sizeof(renderedModels.id[0]);
-            for (int i = 0; i < numModels; i++) {
-                if (renderedModels.id[i] == 0) { continue; }
-                intersectRayWithRenderedModels(rayOrigin, rayDir, i, foundIntersects, ubo.model); 
-            }
-            
-
-          
-
-        }
-        else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS) {
-            isObjectPicking = false;
-        }
-        
-    }
-      
-    void intersectRayWithRenderedModels(glm::vec3 rayOrigin, glm::vec3 rayDirection, int modelIndex, int& foundIntersects, glm::mat4 modelMatrix) {
-
-        const float EPSILON = 0.000001f;
-
-        std::vector<uint32_t> indices = renderedModels.indices[modelIndex];
-        std::vector<Triangle> triangles;
-
-        void* vertexBufferMemoryPtr;
-        vkMapMemory(device, renderedModels.vertexBufferMemory[modelIndex], 0, VK_WHOLE_SIZE, 0, &vertexBufferMemoryPtr);
-        Vertex* vertices = (Vertex*)vertexBufferMemoryPtr;
-
-        for (int j = 0; j < indices.size(); j += 3) {
-
-            Triangle newTriangle;
-            newTriangle.indexes[0] = indices[j];
-            newTriangle.indexes[1] = indices[j + 1];
-            newTriangle.indexes[2] = indices[j + 2];
-
-            newTriangle.vertices[0] = glm::vec3(modelMatrix * glm::vec4(vertices[newTriangle.indexes[0]].pos, 1.0f));
-            newTriangle.vertices[1] = glm::vec3(modelMatrix * glm::vec4(vertices[newTriangle.indexes[1]].pos, 1.0f));
-            newTriangle.vertices[2] = glm::vec3(modelMatrix * glm::vec4(vertices[newTriangle.indexes[2]].pos, 1.0f));
-            
-
-            triangles.push_back(newTriangle);
-        }
-
-        vkUnmapMemory(device, renderedModels.vertexBufferMemory[modelIndex]);
-
-        int numTris = triangles.size();
-
-        for (int k = 0; k < numTris; k++) {
-
-            // Get the triangle edges
-            glm::vec3 edge1 = (triangles[k].vertices[1] - triangles[k].vertices[0]);
-            glm::vec3 edge2 = (triangles[k].vertices[2] - triangles[k].vertices[0]);
-
-            // Calculate the determinant
-            glm::vec3 P = glm::cross(rayDirection, edge2);
-            float det = glm::dot(edge1, P);
-
-            // If the determinant is close to zero, the ray lies in the plane of the triangle
-            if (det > -EPSILON && det < EPSILON)
-                continue;
-
-            float inv_det = 1.0f / det;
-
-            // Calculate the distance from the first vertex to the ray origin
-            glm::vec3 T = rayOrigin - triangles[k].vertices[0];
-
-            // Calculate u parameter and test bounds
-            float u = glm::dot(T, P) * inv_det;
-            if (u < 0.0f || u > 1.0f)
-                continue;
-
-            // Prepare to test v parameter
-            glm::vec3 Q = glm::cross(T, edge1);
-
-            // Calculate v parameter and test bounds
-            float v = glm::dot(rayDirection, Q) * inv_det;
-            if (v < 0.0f || u + v > 1.0f)
-                continue;
-
-            // Calculate t, the distance along the ray to the intersection point
-            float t = glm::dot(edge2, Q) * inv_det;
-
-            // If t is positive, the intersection is valid
-            if (t > EPSILON) {
-                foundIntersects += 1;
-            }
-
-        }
-    
-    }
 
     
 }
