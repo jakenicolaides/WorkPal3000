@@ -208,6 +208,7 @@ namespace EngineUI {
             if (std::chrono::duration_cast<std::chrono::seconds>(now - lastBlinkTime).count() > 1) { // Change the number to adjust the blink speed
                 robotOpenEyes = false;
                 lastBlinkTime = now;
+                //WorkPal3000::printElapsedTime();
             }
 
             //Robot snoozing
@@ -229,7 +230,12 @@ namespace EngineUI {
             }
 
             //Robot idle
-            if (!isRobotSleeping && !isRobotWaving) robotHead = "[^_^]";
+            if (robotOpenEyes) {
+                robotHead = "[^_^]";
+            }
+            else {
+                robotHead = "[-_-]";
+            }
    
          
             //Robot Sleeping - animation
@@ -275,8 +281,8 @@ namespace EngineUI {
             //Assemble robot
             std::vector<std::string> robotParts = { robotHead, robotBody, robotFeet };
 
-    
-            std::string timerContent = "       Welcome back, Jake!\nLet's get some serious work done.";
+            std::string timerContent = WorkPal3000::getElapsedTime();
+           // std::string timerContent = "       Welcome back, Jake!\nLet's get some serious work done.";
             //std::string timerContent = " You have been idle for 45 minutes.\n       Have you been working?";
 
             // Invisible child window to enable centering for multiple elements
