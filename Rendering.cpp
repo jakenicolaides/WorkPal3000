@@ -12,14 +12,18 @@
 #include <vector>
 #include <iostream>
 #include "EngineUI.h"
-#include "Debug.h"
-#include "Models.h"
-#include "Functions.h"
-#include "FileBrowser.h"
 #include "Data.h"
 #include "imguizmo.h"
-#include "EngineUIFunctions.h"
-#include "OpenXR.h"
+
+static const int numEntities = 100;
+
+struct Entities {
+    int id[numEntities] = { 0 };
+    glm::mat4 transform[numEntities] = { glm::mat4(1.0f) };
+    glm::quat rotation[numEntities] = { glm::quat(1.0f, 0.0f, 0.0f, 0.0f) };
+    std::string typePath[numEntities] = { "" };
+    int renderedModelId[numEntities] = { 0 };
+};
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -40,6 +44,26 @@
 #include "tiny_gltf.h"
 
 namespace Rendering {
+
+    struct RenderedModels {
+        int id[numEntities] = { 0 };
+        std::vector<uint32_t> indices[numEntities];
+        VkBuffer vertexBuffer[numEntities];
+        VkBuffer indexBuffer[numEntities];
+        uint32_t index[numEntities];
+        VkDeviceMemory indexBufferMemory[numEntities];
+        VkDeviceMemory vertexBufferMemory[numEntities];
+        VmaAllocation vertexAllocation[numEntities];
+        VmaAllocation indexAllocation[numEntities];
+        std::vector<VkDescriptorSet> descriptorSets[numEntities];
+    };
+
+    //Dumping data stuff into here so i can bin off data
+    extern Entities entities;
+    RenderedModels renderedModels;
+    extern Entities entities;
+    extern RenderedModels renderedModels;
+    Entities entities;
 
     //GLobals
     GLFWwindow* window;
@@ -163,10 +187,8 @@ namespace Rendering {
 
     void start() {
         initWindow();
-        OpenXR::initOpenXR();
         initVulkan();
         initImgui();
-        UnseenEngine::initEngine();
         mainLoop();
         cleanup();
     }
@@ -177,7 +199,7 @@ namespace Rendering {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // This line prevents window resizing
 
-        window = glfwCreateWindow(WIDTH, HEIGHT, UnseenEngine::ENGINE_TITLE.c_str(), nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "WorkPal 3000 - [^_^]" , nullptr, nullptr);
         //glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
@@ -195,7 +217,6 @@ namespace Rendering {
         if (!ImGui::IsWindowHovered(ImGuiFocusedFlags_AnyWindow)) {
             const float zoomSpeed = 0.1f;
             cameraPosition += (float)yoffset * zoomSpeed * cameraSpeed * cameraFront;
-            EngineUIFunctions::viewportCameraTranslation(true);
         }
 
     }
@@ -308,7 +329,6 @@ namespace Rendering {
                 double deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
                 updateCamera(window, deltaTime);
-                EngineUIFunctions::viewportCameraTranslation(true);
 
 
             objectPicker();
@@ -319,8 +339,6 @@ namespace Rendering {
                 ImGui_ImplGlfw_NewFrame();
             }
           
-
-            UnseenEngine::engineLoop();
 
             if (!isPlayingGame) {
                 ImGui::NewFrame();
@@ -394,12 +412,12 @@ namespace Rendering {
         }
         */
         
-        for (size_t i = 0; i < Data::numEntities; i++)
+        for (size_t i = 0; i < numEntities; i++)
         {
-            vkDestroyBuffer(device, Data::renderedModels.indexBuffer[i], nullptr);
-            vkFreeMemory(device, Data::renderedModels.indexBufferMemory[i], nullptr);
-            vkDestroyBuffer(device, Data::renderedModels.vertexBuffer[i], nullptr);
-            vkFreeMemory(device, Data::renderedModels.vertexBufferMemory[i], nullptr);
+            vkDestroyBuffer(device, renderedModels.indexBuffer[i], nullptr);
+            vkFreeMemory(device, renderedModels.indexBufferMemory[i], nullptr);
+            vkDestroyBuffer(device, renderedModels.vertexBuffer[i], nullptr);
+            vkFreeMemory(device, renderedModels.vertexBufferMemory[i], nullptr);
         }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -1201,15 +1219,15 @@ namespace Rendering {
 
 
     void createUniformBuffers() {
-        VkDeviceSize bufferSize = sizeof(UniformBufferObject) * Data::numEntities;
+        VkDeviceSize bufferSize = sizeof(UniformBufferObject) * numEntities;
 
-        uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT * Data::numEntities);
-        uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT * Data::numEntities);
-        uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT * Data::numEntities);
+        uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT * numEntities);
+        uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT * numEntities);
+        uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT * numEntities);
 
         for (size_t frame = 0; frame < MAX_FRAMES_IN_FLIGHT; ++frame) {
-            for (size_t i = 0; i < Data::numEntities; ++i) {
-                size_t index = frame * Data::numEntities + i;
+            for (size_t i = 0; i < numEntities; ++i) {
+                size_t index = frame * numEntities + i;
                 createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[index], uniformBuffersMemory[index]);
              
             }
@@ -1376,26 +1394,17 @@ namespace Rendering {
 
 
         /*This is where the model is drawn */
-        for (size_t i = 0; i < Data::numEntities; i++) {
-            if (Data::renderedModels.id[i] != 0) {
-                VkBuffer vertexBuffers[] = { Data::renderedModels.vertexBuffer[i] };
+        for (size_t i = 0; i < numEntities; i++) {
+            if (renderedModels.id[i] != 0) {
+                VkBuffer vertexBuffers[] = { renderedModels.vertexBuffer[i] };
                 VkDeviceSize offsets[] = { 0 };
                 uint32_t modelIndex = i;
                 vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &modelIndex);
                 vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-                vkCmdBindIndexBuffer(commandBuffer, Data::renderedModels.indexBuffer[i], 0, VK_INDEX_TYPE_UINT32);
-
-                if (isPlayingGame) {
-                    for (uint32_t viewIndex = 0; viewIndex < OpenXR::viewCount; ++viewIndex) {
-                        uint32_t descriptorSetIndex = modelIndex * MAX_FRAMES_IN_FLIGHT * OpenXR::viewCount + currentFrame * OpenXR::viewCount + viewIndex;
-                        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &Data::renderedModels.descriptorSets[i][currentFrame], 0, nullptr);
-                        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Data::renderedModels.index[i]), 1, 0, 0, 0);
-                    }
-                }
-                else {
-                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &Data::renderedModels.descriptorSets[i][currentFrame], 0, nullptr);
-                    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Data::renderedModels.index[i]), 1, 0, 0, 0);
-                }
+                vkCmdBindIndexBuffer(commandBuffer, renderedModels.indexBuffer[i], 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &renderedModels.descriptorSets[i][currentFrame], 0, nullptr);
+                vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedModels.index[i]), 1, 0, 0, 0);
+                
                
             }
         }
@@ -1437,14 +1446,14 @@ namespace Rendering {
         
         UniformBufferObject ubo{};
 
-        glm::mat4 model = Data::entities.transform[modelIndex];
+        glm::mat4 model = entities.transform[modelIndex];
 
         glm::vec3 scale;
-        scale.x = glm::length(glm::vec3(Data::entities.transform[modelIndex][0]));
-        scale.y = glm::length(glm::vec3(Data::entities.transform[modelIndex][1]));
-        scale.z = glm::length(glm::vec3(Data::entities.transform[modelIndex][2]));
+        scale.x = glm::length(glm::vec3(entities.transform[modelIndex][0]));
+        scale.y = glm::length(glm::vec3(entities.transform[modelIndex][1]));
+        scale.z = glm::length(glm::vec3(entities.transform[modelIndex][2]));
 
-        glm::mat3 rotationMatrix = glm::mat3_cast(Data::entities.rotation[modelIndex]);
+        glm::mat3 rotationMatrix = glm::mat3_cast(entities.rotation[modelIndex]);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 model[i][j] = rotationMatrix[i][j];
@@ -1473,8 +1482,12 @@ namespace Rendering {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         //Update swapchains
+        /**
         if (isPlayingGame) {
-            updateOpenXRSwapchainImages(OpenXR::session, OpenXR::xrSwapchain, &imageIndex); } else { ImGui::Render(); }
+            updateOpenXRSwapchainImages(OpenXR::session, OpenXR::xrSwapchain, &imageIndex); } else { 
+            */
+        ImGui::Render();
+
 
         VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
@@ -1482,17 +1495,11 @@ namespace Rendering {
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { throw std::runtime_error("failed to acquire swap chain image!"); }
        
         //Update uniform buffers
-        for (uint32_t modelIndex = 0; modelIndex < Data::numEntities; ++modelIndex) {
-            if (isPlayingGame) {
-                for (uint32_t i = 0; i < OpenXR::viewCount; ++i) {
-                    uint32_t bufferIndex = modelIndex * MAX_FRAMES_IN_FLIGHT + currentFrame;
-                    updateUniformBuffer(device, uniformBuffersMemory[bufferIndex], modelIndex, currentFrame, i, cameraPosition, cameraFront, cameraUp, fov, swapChainExtent);
-                }
-            }
-            else {
+        for (uint32_t modelIndex = 0; modelIndex < numEntities; ++modelIndex) {
+           
                 uint32_t bufferIndex = modelIndex * MAX_FRAMES_IN_FLIGHT + currentFrame;
                 updateUniformBuffer(device, uniformBuffersMemory[bufferIndex], modelIndex, currentFrame, 0, cameraPosition, cameraFront, cameraUp, fov, swapChainExtent);
-            }
+            
         }
 
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -1535,10 +1542,6 @@ namespace Rendering {
         }
         else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
-        }
- 
-        if (isPlayingGame) {
-            submitOpenXRFrame(OpenXR::swapchainImageData, OpenXR::viewCount, imageIndex, renderFinishedSemaphores[currentFrame], inFlightFences[currentFrame]);
         }
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -2120,13 +2123,7 @@ namespace Rendering {
         stbi_uc* pixels;
         std::string pathString = "";
 
-        if (textureName == "") {
-            pathString = Functions::root + "\\Assets\\no-material.png";
-        }
-        else {
-            pathString = FileBrowser::getParentDirectory(modelPath) + "\\" + textureName;
-        }
-
+   
         pixels = stbi_load(pathString.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     
 
@@ -2195,112 +2192,7 @@ namespace Rendering {
         }
     }
 
-    //Returns the id of the rendered model
-    int loadModelDynamically(std::string modelPath) {
-
-        //Basic 
-        std::vector<uint32_t> modelIndices;
-        std::vector<Vertex> modelVertices;
-        VkBuffer vertexBuffer;
-        VkBuffer indexBuffer;
-        std::vector<VkDescriptorSet> descriptorSets;
-        std::string modelTextureFilename;
-       
-
-        // Create an instance of the Assimp importer
-        Models::assimpLoadModel(modelPath, modelVertices, modelIndices, modelTextureFilename);
-
-        //CREATE THE VERTEX BUFFER: Allocate some memory for the new model's vertexes
-        VkBufferCreateInfo vertexBufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO }; // Define buffer creation info
-        vertexBufferInfo.size = sizeof(modelVertices[0]) * modelVertices.size();
-        vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        VmaAllocationCreateInfo vertexAllocInfo = {}; // Define allocation info
-        vertexAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-        VmaAllocation vertexBufferAllocation;
-        vmaCreateBuffer(vmaAllocator, &vertexBufferInfo, &vertexAllocInfo, &vertexBuffer, &vertexBufferAllocation, nullptr);
-        void* mappedVertexData;  // Map the memory and copy the vertex data to the buffer
-        vmaMapMemory(vmaAllocator, vertexBufferAllocation, &mappedVertexData);
-        memcpy(mappedVertexData, modelVertices.data(), vertexBufferInfo.size);
-        vmaUnmapMemory(vmaAllocator, vertexBufferAllocation);
-
-        //CREATE THE INDEX BUFFER: Allocate some memory for the new model's indicies
-        VkBufferCreateInfo indexBufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        indexBufferInfo.size = modelIndices.size() * sizeof(modelIndices[0]);
-        indexBufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        VmaAllocationCreateInfo indexAllocInfo = {}; // Define allocation info
-        indexAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-        VmaAllocation indexBufferAllocation;
-        vmaCreateBuffer(vmaAllocator, &indexBufferInfo, &indexAllocInfo, &indexBuffer, &indexBufferAllocation, nullptr);
-        void* mappedIndexData;// Map the memory and copy the index data to the buffer
-        vmaMapMemory(vmaAllocator, indexBufferAllocation, &mappedIndexData);
-        memcpy(mappedIndexData, modelIndices.data(), indexBufferInfo.size);
-        vmaUnmapMemory(vmaAllocator, indexBufferAllocation);
-
-        //CREATE THE IMAGE VIEW AND SAMPLER: Create the image view and sampler for the new model
-        VkImage textureImage = createTextureImage(modelTextureFilename, modelPath);
-        VkImageView textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
-        VkSampler textureSampler = createTextureSampler();
-
-        int emptySlot = Data::initialiseNewEntry(Data::renderedModels.id, sizeof(Data::renderedModels.id) / sizeof(Data::renderedModels.id[0]));
-
-        //CREATE DESCRIPTOR SETS: Create the descriptor set for each model
-        std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = descriptorPool;
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-        allocInfo.pSetLayouts = layouts.data();
     
-        descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-           
-            VkDescriptorBufferInfo bufferInfo{};
-            bufferInfo.buffer = uniformBuffers[emptySlot * MAX_FRAMES_IN_FLIGHT + i];
-            bufferInfo.offset = 0;
-            bufferInfo.range = sizeof(UniformBufferObject);
-            VkDescriptorImageInfo imageInfo{};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = textureImageView;
-            imageInfo.sampler = textureSampler;
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-            descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[0].dstSet = descriptorSets[i];
-            descriptorWrites[0].dstBinding = 0;
-            descriptorWrites[0].dstArrayElement = 0;
-            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrites[0].descriptorCount = 1;
-            descriptorWrites[0].pBufferInfo = &bufferInfo;
-            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[1].dstSet = descriptorSets[i];
-            descriptorWrites[1].dstBinding = 1;
-            descriptorWrites[1].dstArrayElement = 0;
-            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            descriptorWrites[1].descriptorCount = 1;
-            descriptorWrites[1].pImageInfo = &imageInfo;
-            vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-            
-        }
-
-
-        indexBufferAllocation->GetAllocHandle();
-
-        //ADD MODEL TO ARRAY: Add this model to an array of models to be rendered by the command buffer
-       
-        Data::renderedModels.vertexBuffer[emptySlot] = vertexBuffer;
-        Data::renderedModels.indexBuffer[emptySlot] = indexBuffer;
-        Data::renderedModels.index[emptySlot] = modelIndices.size();
-        Data::renderedModels.indexBufferMemory[emptySlot] = indexBufferAllocation->GetMemory();
-        Data::renderedModels.vertexBufferMemory[emptySlot] = vertexBufferAllocation->GetMemory();
-        Data::renderedModels.vertexAllocation[emptySlot] = indexBufferAllocation;
-        Data::renderedModels.indexAllocation[emptySlot] = vertexBufferAllocation;
-        Data::renderedModels.indices[emptySlot] = modelIndices;
-        Data::renderedModels.descriptorSets[emptySlot] = descriptorSets;
-
-        return Data::renderedModels.id[emptySlot];
-    }
 
     //TODO:
     // (1) Create/load bounding boxes for all our meshes and store them in the rendered models array
@@ -2352,21 +2244,15 @@ namespace Rendering {
            // glm::vec3 rayOrigin = cameraPosition;
             
             
-            debug.log("ray dir:");
-            debug.log(rayDir);
-
-            debug.log("ray ori:");
-            debug.log(rayOrigin);
       
 
             // Perform intersection tests
             int foundIntersects = 0;
-            int numModels = sizeof(Data::renderedModels.id) / sizeof(Data::renderedModels.id[0]);
+            int numModels = sizeof(renderedModels.id) / sizeof(renderedModels.id[0]);
             for (int i = 0; i < numModels; i++) {
-                if (Data::renderedModels.id[i] == 0) { continue; }
+                if (renderedModels.id[i] == 0) { continue; }
                 intersectRayWithRenderedModels(rayOrigin, rayDir, i, foundIntersects, ubo.model); 
             }
-            debug.log(std::to_string(foundIntersects));
             
 
           
@@ -2382,11 +2268,11 @@ namespace Rendering {
 
         const float EPSILON = 0.000001f;
 
-        std::vector<uint32_t> indices = Data::renderedModels.indices[modelIndex];
+        std::vector<uint32_t> indices = renderedModels.indices[modelIndex];
         std::vector<Triangle> triangles;
 
         void* vertexBufferMemoryPtr;
-        vkMapMemory(device, Data::renderedModels.vertexBufferMemory[modelIndex], 0, VK_WHOLE_SIZE, 0, &vertexBufferMemoryPtr);
+        vkMapMemory(device, renderedModels.vertexBufferMemory[modelIndex], 0, VK_WHOLE_SIZE, 0, &vertexBufferMemoryPtr);
         Vertex* vertices = (Vertex*)vertexBufferMemoryPtr;
 
         for (int j = 0; j < indices.size(); j += 3) {
@@ -2404,7 +2290,7 @@ namespace Rendering {
             triangles.push_back(newTriangle);
         }
 
-        vkUnmapMemory(device, Data::renderedModels.vertexBufferMemory[modelIndex]);
+        vkUnmapMemory(device, renderedModels.vertexBufferMemory[modelIndex]);
 
         int numTris = triangles.size();
 
@@ -2452,91 +2338,5 @@ namespace Rendering {
     
     }
 
-    void submitOpenXRFrame(XrSwapchainImageBaseHeader* images, uint32_t viewCount, uint32_t imageIndex, VkSemaphore waitSemaphore, VkFence inFlightFence) {
-
-        // Acquire the frame state and display time
-        XrFrameWaitInfo frameWaitInfo{ XR_TYPE_FRAME_WAIT_INFO };
-        XrFrameState frameState{ XR_TYPE_FRAME_STATE };
-        xrWaitFrame(OpenXR::session, &frameWaitInfo, &frameState);
-        xrBeginFrame(OpenXR::session, nullptr);
-
-        std::vector<XrView> views(viewCount, { XR_TYPE_VIEW });
-        XrViewState viewState{ XR_TYPE_VIEW_STATE };
-        XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
-        viewLocateInfo.viewConfigurationType = OpenXR::viewConfigurationType;
-        viewLocateInfo.displayTime = frameState.predictedDisplayTime;
-        viewLocateInfo.space = OpenXR::localSpace; // A space you have created for your application
-
-        XrResult lV = xrLocateViews(OpenXR::session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data());
-        if (XR_FAILED(lV)) {
-            throw std::runtime_error("Failed to locate views");
-        }
-
-        // Prepare the projection layers
-        std::vector<XrCompositionLayerProjectionView> projectionViews(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
-        for (uint32_t i = 0; i < viewCount; ++i) {
-            projectionViews[i].pose = views[i].pose;
-            projectionViews[i].fov = views[i].fov;
-            projectionViews[i].subImage.swapchain = OpenXR::xrSwapchain;
-            projectionViews[i].subImage.imageRect.offset = { 0, 0 };
-            projectionViews[i].subImage.imageRect.extent =
-            {
-                static_cast<int32_t>(OpenXR::swapchainWidth),
-               static_cast<int32_t>(OpenXR::swapchainHeight)
-            };
-            projectionViews[i].subImage.imageArrayIndex = imageIndex;
-        }
-
-        // Perform any necessary operations before submitting the OpenXR frame.
-        XrFrameEndInfo frameEndInfo = {};
-        frameEndInfo.type = XR_TYPE_FRAME_END_INFO;
-        frameEndInfo.displayTime = frameState.predictedDisplayTime;
-        frameEndInfo.environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
-        frameEndInfo.layerCount = 1;
-
-        XrCompositionLayerProjection layer = {};
-        layer.type = XR_TYPE_COMPOSITION_LAYER_PROJECTION;
-        layer.space = OpenXR::localSpace; // Set the appropriate space.
-        layer.viewCount = viewCount;
-        layer.views = projectionViews.data(); // Set the appropriate views.
-
-        XrCompositionLayerBaseHeader* layers[] = {
-            reinterpret_cast<XrCompositionLayerBaseHeader*>(&layer)
-        };
-        frameEndInfo.layers = layers;
-
-        XrResult result = xrEndFrame(OpenXR::session, &frameEndInfo);
-
-        if (XR_FAILED(result)) {
-            throw std::runtime_error("Failed to submit OpenXR frame!");
-        }
-        
-    }
-
-    void updateOpenXRSwapchainImages(XrSession session, XrSwapchain swapchain, uint32_t* pImageIndex) {
-        // Acquire an OpenXR swapchain image
-        XrSwapchainImageAcquireInfo acquireInfo = {};
-        acquireInfo.type = XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO;
-        XrResult result = xrAcquireSwapchainImage(swapchain, &acquireInfo, pImageIndex);
-        if (XR_FAILED(result)) {
-            throw std::runtime_error("Failed to acquire OpenXR swapchain image!");
-        }
-
-        // Wait for the OpenXR swapchain image to be ready
-        XrSwapchainImageWaitInfo waitInfo = {};
-        waitInfo.type = XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO;
-        waitInfo.timeout = XR_INFINITE_DURATION;
-        result = xrWaitSwapchainImage(swapchain, &waitInfo);
-        if (XR_FAILED(result)) {
-            throw std::runtime_error("Failed to wait for OpenXR swapchain image!");
-        }
-        // Release the OpenXR swapchain image after rendering
-        XrSwapchainImageReleaseInfo releaseInfo = {};
-        releaseInfo.type = XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO;
-        result = xrReleaseSwapchainImage(swapchain, &releaseInfo);
-        if (XR_FAILED(result)) {
-            throw std::runtime_error("Failed to release OpenXR swapchain image!");
-        }
-    }
-
+    
 }

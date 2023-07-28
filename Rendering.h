@@ -5,7 +5,6 @@
 #include <fstream>
 #include <glfw3.h>
 #include <optional>
-#include "UnseenEngine.h"
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>
@@ -21,6 +20,8 @@
 
 
 namespace Rendering {
+
+    
 
     //Consts
     const uint32_t WIDTH = 650;
@@ -179,7 +180,7 @@ namespace Rendering {
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     void createUniformBuffers();
     void createDescriptorPool();
-    void createDescriptorSets();
+    
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
     VkCommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -188,7 +189,7 @@ namespace Rendering {
     void createCommandBuffers();
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     void createSyncObjects();
-    void updateUniformBuffer(uint32_t currentImage);
+    
     void drawFrame();
     VkShaderModule createShaderModule(const std::vector<char>& code);
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -207,13 +208,12 @@ namespace Rendering {
     void createVulkanMemoryAllocator();
     bool LoadTextureFromFile(const char* filename, ImGuiTextureData* tex_data);
     void RemoveTexture(ImGuiTextureData* tex_data);
-    int loadModelDynamically(std::string modelPath);
+   
     void updateCamera(GLFWwindow* window, float deltaTime);
     void intersectRayWithRenderedModels(glm::vec3 rayOrigin, glm::vec3 rayDirection, int modelIndex, int& foundIntersects, glm::mat4 modelMatrix);
     void objectPicker();
     void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    void submitOpenXRFrame(XrSwapchainImageBaseHeader* images, uint32_t viewCount, uint32_t imageIndex, VkSemaphore waitSemaphore, VkFence inFlightFence);
-    void updateOpenXRSwapchainImages(XrSession session, XrSwapchain swapchain, uint32_t* pImageIndex);
+ 
         
 }
 

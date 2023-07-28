@@ -27,25 +27,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="UnseenEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EngineUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileBrowser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Serialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vendors\IMGUI\imgui.cpp">
@@ -69,12 +54,6 @@
     <ClCompile Include="Vendors\IMGUI\imgui_widgets.cpp">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="Models.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Vendors\IMGUIZMO\GraphEditor.cpp">
       <Filter>Header Files\vendor</Filter>
     </ClCompile>
@@ -90,15 +69,6 @@
     <ClCompile Include="Vendors\IMGUIZMO\ImSequencer.cpp">
       <Filter>Header Files\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="EngineUIFunctions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenXR.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="implot_items.cpp">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
@@ -107,6 +77,9 @@
     </ClCompile>
     <ClCompile Include="implot_demo.cpp">
       <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkPal3000.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,18 +98,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UnseenEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileBrowser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Functions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Debug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vendors\IMGUI\imstb_truetype.h">
@@ -169,12 +130,6 @@
     <ClInclude Include="Vendors\TINYGLTF\tiny_gltf.h">
       <Filter>Header Files\vendor</Filter>
     </ClInclude>
-    <ClInclude Include="Models.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Data.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vendors\IMGUIZMO\GraphEditor.h">
       <Filter>Header Files\vendor</Filter>
     </ClInclude>
@@ -193,20 +148,14 @@
     <ClInclude Include="Vendors\IMGUIZMO\ImZoomSlider.h">
       <Filter>Header Files\vendor</Filter>
     </ClInclude>
-    <ClInclude Include="EngineUIFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenXR.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="implot.h">
+    <ClInclude Include="WorkPal3000.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="implot_internal.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="implot.h">
+      <Filter>Header Files\vendor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

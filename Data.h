@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "Rendering.h"
 #include "vk_mem_alloc.h"
@@ -42,3 +43,5 @@ namespace Data {
   
 
 }
+
+*/

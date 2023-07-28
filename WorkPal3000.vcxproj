@@ -148,20 +148,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Data.cpp" />
-    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EngineUI.cpp" />
-    <ClCompile Include="EngineUIFunctions.cpp" />
-    <ClCompile Include="FileBrowser.cpp" />
-    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="implot.cpp" />
     <ClCompile Include="implot_demo.cpp" />
     <ClCompile Include="implot_items.cpp" />
-    <ClCompile Include="Keyboard.cpp" />
-    <ClCompile Include="Models.cpp" />
-    <ClCompile Include="OpenXR.cpp" />
-    <ClCompile Include="Serialization.cpp" />
-    <ClCompile Include="UnseenEngine.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="Vendors\IMGUIZMO\GraphEditor.cpp" />
     <ClCompile Include="Vendors\IMGUIZMO\ImCurveEdit.cpp" />
@@ -175,25 +165,17 @@
     <ClCompile Include="Vendors\IMGUI\imgui_draw.cpp" />
     <ClCompile Include="Vendors\IMGUI\imgui_tables.cpp" />
     <ClCompile Include="Vendors\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="WorkPal3000.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag.spv" />
     <None Include="shaders\vert.spv" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Data.h" />
-    <ClInclude Include="Debug.h" />
     <ClInclude Include="EngineUI.h" />
-    <ClInclude Include="EngineUIFunctions.h" />
-    <ClInclude Include="FileBrowser.h" />
-    <ClInclude Include="Functions.h" />
     <ClInclude Include="implot.h" />
     <ClInclude Include="implot_internal.h" />
-    <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="Models.h" />
-    <ClInclude Include="OpenXR.h" />
     <ClInclude Include="Rendering.h" />
-    <ClInclude Include="Serialization.h" />
     <ClInclude Include="UnseenEngine.h" />
     <ClInclude Include="Vendors\IMGUIZMO\GraphEditor.h" />
     <ClInclude Include="Vendors\IMGUIZMO\ImCurveEdit.h" />
@@ -211,6 +193,7 @@
     <ClInclude Include="Vendors\TINYGLTF\stb_image.h" />
     <ClInclude Include="Vendors\TINYGLTF\stb_image_write.h" />
     <ClInclude Include="Vendors\TINYGLTF\tiny_gltf.h" />
+    <ClInclude Include="WorkPal3000.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
