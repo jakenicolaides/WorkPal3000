@@ -32,17 +32,17 @@ namespace EngineUI {
 
     //Blinking
     std::chrono::time_point<std::chrono::steady_clock> lastBlinkTime;
-    bool robotOpenEyes = true;
+    bool robotOpenEyes = false;
     int robotBlinkFrames = 0;
 
     //Snoozing
     std::chrono::time_point<std::chrono::steady_clock> lastSnoreTime;
-    bool isRobotSleeping = false;
+    bool isRobotSleeping = true;
     int robotSleepStage = 0;
 
     //Waving 
     std::chrono::time_point<std::chrono::steady_clock> lastWaveTime;
-    bool isRobotWaving = true;
+    bool isRobotWaving = false;
     int robotWaveStage = 0;
     
 
@@ -89,7 +89,7 @@ namespace EngineUI {
         if (windowState["showBlockList"]) {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(25, 15));
             ImGui::Begin("BlockList");
-            ImGui::Text("Enter the URLs of the websites you would\nlike to be blocked.");
+            ImGui::Text("Enter the URLs of the websites you would\nlike to be blocked whilst the app is open.");
             ImGui::Dummy(ImVec2(0, 10));
             ImGui::Text("Note: submitting a blocklist will reset your\ntimer. This is by design so you don't keep\nfiddling with it.");
             ImGui::Dummy(ImVec2(0, 10));
@@ -293,9 +293,9 @@ namespace EngineUI {
             std::vector<std::string> robotParts = { robotHead, robotBody, robotFeet };
 
     
-            std::string timerContent = "       Welcome back, Jake!\nLet's get some serious work done.";
+            //std::string timerContent = "       Welcome back, Jake!\nLet's get some serious work done.";
             //std::string timerContent = " You have been working for 36 minutes";
-            //std::string timerContent = " You have been idle for 45 minutes.\n       Have you been working?";
+            std::string timerContent = " You have been idle for 45 minutes.\n       Have you been working?";
 
             // Invisible child window to enable centering for multiple elements
             ImGui::BeginChild("Centered child window", ImGui::GetContentRegionAvail(), false);
@@ -333,7 +333,7 @@ namespace EngineUI {
            
             ImGui::SetCursorPos(textPos);
          
-            if (false) {
+            if (true) {
                 ImGui::Button("Yes, keep\nidle time", ImVec2(296, 80));
                 ImGui::SameLine();
                 ImGui::Button("No, remove\nidle time", ImVec2(296, 80));
