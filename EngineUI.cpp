@@ -40,6 +40,14 @@ namespace EngineUI {
         windowState["showTimer"] = true;
         ImGui::StyleColorsClassic();
 
+        // Get a reference to the current ImGui style
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        // Change the color for the window background
+        // The parameters for ImVec4 are (r, g, b, a) -- all between 0.0f and 1.0f
+       // style.Colors[ImGuiCol_WindowBg] = ImVec4(0.882f, 0.69f, 1.0f, 1.0f);
+        //style.Colors[ImGuiCol_Text] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);  //
+
     }
 
     std::map<std::string, bool> loopUI(bool& applicationOpen, float& cameraSpeed, float& fov, bool& firstMouse) {
@@ -199,6 +207,8 @@ namespace EngineUI {
         if (windowState["showTimer"]) {
             ImGui::Begin("Time");
 
+            isRobotSleeping = WorkPal3000::isIdling;
+
             std::string robotHead;
             std::string robotBody;
             std::string robotFeet;
@@ -208,7 +218,6 @@ namespace EngineUI {
             if (std::chrono::duration_cast<std::chrono::seconds>(now - lastBlinkTime).count() > 1) { // Change the number to adjust the blink speed
                 robotOpenEyes = false;
                 lastBlinkTime = now;
-                //WorkPal3000::printElapsedTime();
             }
 
             //Robot snoozing
@@ -276,14 +285,10 @@ namespace EngineUI {
             }
 
             //Robot feet - animation
-            robotFeet = "/ \\ ";
+            robotFeet = " / \\ ";
 
             //Assemble robot
             std::vector<std::string> robotParts = { robotHead, robotBody, robotFeet };
-
-            std::string timerContent = WorkPal3000::getElapsedTime();
-           // std::string timerContent = "       Welcome back, Jake!\nLet's get some serious work done.";
-            //std::string timerContent = " You have been idle for 45 minutes.\n       Have you been working?";
 
             // Invisible child window to enable centering for multiple elements
             ImGui::BeginChild("Centered child window", ImGui::GetContentRegionAvail(), false);
@@ -291,14 +296,10 @@ namespace EngineUI {
             // Get the window's size
             ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
-            // Calculate the width of the longest line of text
-            float maxLineWidth = std::max<float>({ ImGui::CalcTextSize(robotHead.c_str()).x, ImGui::CalcTextSize(robotBody.c_str()).x, ImGui::CalcTextSize(robotFeet.c_str()).x, ImGui::CalcTextSize(timerContent.c_str()).x });
-
-            // Calculate the total height of the content
-            float totalContentHeight = ImGui::CalcTextSize((robotHead + "\n" + robotBody + "\n" + robotFeet).c_str()).y + ImGui::CalcTextSize(timerContent.c_str()).y;
-
+         
             // Calculate the position to start drawing text to center it
-            ImVec2 textPos = ImVec2((windowSize.x - maxLineWidth) * 0.5f, (windowSize.y - totalContentHeight) * 0.5f - 20.0f); // Subtract 20 to move everything up
+            float yOffset = 80.0f;
+            ImVec2 textPos = ImVec2((windowSize.x) * 0.5f, (windowSize.y) * 0.5f - yOffset); // Subtract offst to move everything up
 
             // Set the cursor to the calculated position and render the text
             for (const auto& part : robotParts) {
@@ -311,27 +312,52 @@ namespace EngineUI {
             // Add a small offset to the y-coordinate of the text position
             textPos.y += 30.0f;
 
-            // Recalculate the position for the timerContent
-            textPos.x = (windowSize.x - ImGui::CalcTextSize(timerContent.c_str()).x) * 0.5f;
-            ImGui::SetCursorPos(textPos);
-            ImGui::Text(timerContent.c_str());
-          
-            textPos.y += 180;
-            textPos.x = (windowSize.x - 600) * 0.5f;
-           
-            ImGui::SetCursorPos(textPos);
-         
-            if (false) {
-                ImGui::Button("Yes, keep\nidle time", ImVec2(296, 80));
-                ImGui::SameLine();
-                ImGui::Button("No, remove\nidle time", ImVec2(296, 80));
-            }
+            if (WorkPal3000::isIdling) {
 
-            //Robot blink frames
-            if (!robotOpenEyes)robotBlinkFrames++;
-            if (!robotOpenEyes && robotBlinkFrames > 300) {
-                robotOpenEyes = true;
-                robotBlinkFrames = 0;
+                std::string idleTriggeredText = "Idle triggered";
+                std::string idleTimeText = "Idle accumulated: "+WorkPal3000::getIdleTime();
+                std::string idleQuestionText = "Have you been working?";
+                std::vector<std::string> idleTextSnippets = { idleTriggeredText, idleTimeText, idleQuestionText};
+               
+                for (const auto& textSnippet : idleTextSnippets) {
+                    textPos.x = (windowSize.x - ImGui::CalcTextSize(textSnippet.c_str()).x) * 0.5f;
+                    ImGui::SetCursorPos(textPos);
+                    ImGui::Text(textSnippet.c_str());
+                    textPos.y += ImGui::CalcTextSize(textSnippet.c_str()).y;
+                }
+
+                textPos.y += 100;
+                textPos.x = (windowSize.x - 600) * 0.5f;
+                ImGui::SetCursorPos(textPos);
+
+                if (ImGui::Button("Yes, keep\nidle time", ImVec2(296, 80))) {
+                    WorkPal3000::submitIdleResult(true);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("No, remove\nidle time", ImVec2(296, 80))) {
+                    WorkPal3000::submitIdleResult(false);
+                }
+            }
+            else {
+
+                // Regular Time Message
+                std::string timerPreText = "You have been working for:\n";
+                textPos.x = (windowSize.x - ImGui::CalcTextSize(timerPreText.c_str()).x) * 0.5f;
+                ImGui::SetCursorPos(textPos);
+                ImGui::Text(timerPreText.c_str());
+                textPos.y += 30.0f;
+                textPos.x = (windowSize.x - ImGui::CalcTextSize(WorkPal3000::getElapsedTime().c_str()).x) * 0.5f;
+                ImGui::SetCursorPos(textPos);
+                ImGui::Text(WorkPal3000::getElapsedTime().c_str());
+
+               
+
+                //Robot blink frames
+                if (!robotOpenEyes)robotBlinkFrames++;
+                if (!robotOpenEyes && robotBlinkFrames > 300) {
+                    robotOpenEyes = true;
+                    robotBlinkFrames = 0;
+                }
             }
 
             
