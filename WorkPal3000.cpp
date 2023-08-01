@@ -574,12 +574,9 @@ namespace WorkPal3000 {
 
 int main()
 {
-    WorkPal3000::start();
-    Rendering::start();
-    atexit(WorkPal3000::clearHostsFile);
-    while(true) if (WorkPal3000::keepRunning == false) break;
-     
-    
-    return 0;
+   WorkPal3000::start();
+   Rendering::start();
+   atexit(WorkPal3000::clearHostsFile);
+   return 0;
 
 }

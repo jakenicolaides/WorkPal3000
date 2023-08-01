@@ -29,7 +29,7 @@ namespace Rendering {
     #endif
 
     const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-    const std::vector<const char*> deviceExtensions = {  VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_MULTIVIEW_EXTENSION_NAME, "VK_KHR_external_memory", "VK_KHR_external_memory_win32", "VK_KHR_external_fence", "VK_KHR_external_fence_win32", "VK_KHR_external_semaphore", "VK_KHR_external_semaphore_win32", "VK_KHR_get_memory_requirements2", "VK_KHR_dedicated_allocation"};
+    const std::vector<const char*> deviceExtensions = {  VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
     //Structs
     struct QueueFamilyIndices {
@@ -168,7 +168,7 @@ namespace Rendering {
     VkSampleCountFlagBits getMaxUsableSampleCount();
     void createTextureImageView();
     VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-    void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     void createUniformBuffers();
