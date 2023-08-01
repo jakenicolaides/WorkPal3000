@@ -14,6 +14,7 @@ namespace EngineUI {
 	extern std::string currentSelectedItem;
 	std::map<std::string, bool> loopUI(bool& applicationOpen, float &cameraSpeed, float &fov, bool& firstMouse);
 	void initUI();
+	void refreshGraphData();
 }
 
 #endif

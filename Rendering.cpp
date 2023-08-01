@@ -30,9 +30,7 @@ struct Entities {
 //#include <stb_image.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
-
-#include "UnseenEngine.h"
+//#include <tiny_obj_loader.h>
 
 // Define these only in *one* .cc file.
 #define TINYGLTF_IMPLEMENTATION
@@ -197,7 +195,7 @@ namespace Rendering {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // This line prevents window resizing
 
-        window = glfwCreateWindow(WIDTH, HEIGHT, "WorkPal 3000 - [^_^]" , nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "WorkPal 3000" , nullptr, nullptr);
         //glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
@@ -1694,12 +1692,12 @@ namespace Rendering {
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        uint32_t openXRExtensionCount = 0;
-        const char** openXRExtensions;
+        //uint32_t openXRExtensionCount = 0;
+        //const char** openXRExtensions;
        // openXRExtensions = OpenXR::getOpenXRRequiredExtensions(&openXRExtensionCount);
 
         std::vector<const char*> extensions;
-        extensions.reserve(glfwExtensionCount + openXRExtensionCount);
+        extensions.reserve(glfwExtensionCount); //+ openXRExtensionCount);
 
         extensions.insert(extensions.end(), glfwExtensions, glfwExtensions + glfwExtensionCount);
         //extensions.insert(extensions.end(), openXRExtensions, openXRExtensions + openXRExtensionCount);

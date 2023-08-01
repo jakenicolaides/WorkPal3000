@@ -54,21 +54,6 @@
     <ClCompile Include="Vendors\IMGUI\imgui_widgets.cpp">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="Vendors\IMGUIZMO\GraphEditor.cpp">
-      <Filter>Header Files\vendor</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendors\IMGUIZMO\ImCurveEdit.cpp">
-      <Filter>Header Files\vendor</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendors\IMGUIZMO\ImGradient.cpp">
-      <Filter>Header Files\vendor</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendors\IMGUIZMO\ImGuizmo.cpp">
-      <Filter>Header Files\vendor</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendors\IMGUIZMO\ImSequencer.cpp">
-      <Filter>Header Files\vendor</Filter>
-    </ClCompile>
     <ClCompile Include="implot_items.cpp">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
@@ -95,9 +80,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UnseenEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vendors\IMGUI\imstb_truetype.h">
@@ -128,21 +110,6 @@
       <Filter>Header Files\vendor</Filter>
     </ClInclude>
     <ClInclude Include="Vendors\TINYGLTF\tiny_gltf.h">
-      <Filter>Header Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendors\IMGUIZMO\GraphEditor.h">
-      <Filter>Header Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendors\IMGUIZMO\ImCurveEdit.h">
-      <Filter>Header Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendors\IMGUIZMO\ImGradient.h">
-      <Filter>Header Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendors\IMGUIZMO\ImGuizmo.h">
-      <Filter>Header Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendors\IMGUIZMO\ImSequencer.h">
       <Filter>Header Files\vendor</Filter>
     </ClInclude>
     <ClInclude Include="Vendors\IMGUIZMO\ImZoomSlider.h">

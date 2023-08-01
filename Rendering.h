@@ -1,7 +1,5 @@
 #pragma once
-
 #define GLFW_INCLUDE_VULKAN
-
 #include <fstream>
 #include <glfw3.h>
 #include <optional>
@@ -12,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#define XR_USE_GRAPHICS_API_VULKAN
 
 
 namespace Rendering {

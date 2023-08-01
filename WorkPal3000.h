@@ -16,13 +16,30 @@
 namespace WorkPal3000 {
 
     extern bool isIdling;
+    extern std::vector<std::string> blocklist;
+    extern bool keepRunning;
 
     void timerThread(const std::chrono::high_resolution_clock::time_point& startTime);
+    double getSecondsOnDate(std::string date);
     std::thread startTimer();
     void printElapsedTime();
     std::string getElapsedTime();
     void start();
     void submitIdleResult(bool wasWorking);
     std::string getIdleTime();
+    void addUrlsToHostsFile(const std::vector<std::string>& urls);
+    void getUserData();
+    bool isUrlInHostsFile(const std::string& url);
+    void removeUrlFromBlockList(std::string url);
+    void removeUrlsFromHostsFile(const std::vector<std::string>& urls);
+    void addUrlToBlockList(std::string url, int i);
+    void submitBlocklist(std::vector<std::string> newBlocklist);
+    void setup();
+    void saveTime();
+    std::vector<std::string> getDatesInWeek(int weekNumber);
+    int currentWeekOfYear();
+    void clearHostsFile();
+    void getHoursInYear(double yearData[12]);
+
 
 }
