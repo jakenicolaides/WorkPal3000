@@ -12,12 +12,14 @@
 #include <shellapi.h>
 #define WM_APP_QUIT (WM_APP + 1)
 #include "Rendering.h"
+#include "EngineUI.h"
 
 namespace WorkPal3000 {
 
     extern bool isIdling;
     extern std::vector<std::string> blocklist;
     extern bool keepRunning;
+    extern std::string version;
 
     void timerThread(const std::chrono::high_resolution_clock::time_point& startTime);
     double getSecondsOnDate(std::string date);
@@ -40,6 +42,7 @@ namespace WorkPal3000 {
     int currentWeekOfYear();
     void clearHostsFile();
     void getHoursInYear(double yearData[12]);
+    void flashWindow();
 
 
 }

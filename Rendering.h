@@ -2,6 +2,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <fstream>
 #include <glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <glfw3native.h>
 #include <optional>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -203,6 +205,7 @@ namespace Rendering {
     void RemoveTexture(ImGuiTextureData* tex_data);
    
     void updateCamera(GLFWwindow* window, float deltaTime);
+    void flashWindowsEx();
     void intersectRayWithRenderedModels(glm::vec3 rayOrigin, glm::vec3 rayDirection, int modelIndex, int& foundIntersects, glm::mat4 modelMatrix);
     void objectPicker();
     void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);

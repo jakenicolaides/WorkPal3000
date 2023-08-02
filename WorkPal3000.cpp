@@ -4,6 +4,7 @@ namespace WorkPal3000 {
 
     //Global variables
     bool isIdling = false;
+    std::string version = "1.0.0";
 
     //Private variables
     std::chrono::duration<double> elapsedTime;
@@ -48,7 +49,6 @@ namespace WorkPal3000 {
                 return seconds;
             }
             else {
-                std::cout << "Date not found in timeData." << std::endl;
                 return 0;
             }
         }
@@ -158,6 +158,17 @@ namespace WorkPal3000 {
         return GetTickCount() - lii.dwTime;
     }
 
+    void flashWindow() {
+
+        Rendering::flashWindowsEx();
+
+        glfwHideWindow(Rendering::window);
+        glfwPollEvents(); // Process events
+        glfwWaitEventsTimeout(0.2); // Wait for a bit
+        glfwShowWindow(Rendering::window);
+    }
+
+
     void checkInactivityThread() {
         std::unique_lock<std::mutex> lock(cv_m);
         while (keepRunning) {
@@ -173,13 +184,11 @@ namespace WorkPal3000 {
                 idleTime = GetWindowsIdleMilliseconds();
             }
 
-            //std::cout << idleTime;
-            //std::cout << "\n";
-
             if (idleTime >= (idleDuration * 60 * 1000) && !isIdling) {
             
                 isIdling = true;
-                // flashConsoleWindow();
+                flashWindow();
+                ImGui::SetWindowFocus("Time");
             }
         }
     }
@@ -574,6 +583,7 @@ namespace WorkPal3000 {
 
 int main()
 {
+   ShowWindow(GetConsoleWindow(), SW_HIDE);
    WorkPal3000::start();
    Rendering::start();
    atexit(WorkPal3000::clearHostsFile);

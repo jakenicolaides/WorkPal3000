@@ -20,10 +20,10 @@ namespace EngineUI {
 
     //Robot vars
 
-    //Blinking
+    //Idle/Blinking
     std::chrono::time_point<std::chrono::steady_clock> lastBlinkTime;
+    bool isRobotIdle = true;
     bool robotOpenEyes = true;
-    int robotBlinkFrames = 0;
 
     //Snoozing
     std::chrono::time_point<std::chrono::steady_clock> lastSnoreTime;
@@ -37,11 +37,12 @@ namespace EngineUI {
     
 
     void initUI() {
-        windowState["showDemoWindow"] = true;
+        windowState["showDemoWindow"] = false;
         windowState["showBlockList"] = true;
         windowState["showStats"] = true;
+        windowState["showSettings"] = true;
         windowState["showTimer"] = true;
-        windowState["showTimer"] = true;
+        
         ImGui::StyleColorsClassic();
         
         // Get a reference to the current ImGui style
@@ -130,7 +131,7 @@ namespace EngineUI {
         //Blocklist
         if (windowState["showBlockList"]) {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(25, 15));
-            ImGui::Begin("BlockList");
+            ImGui::Begin("BlockList", 0, ImGuiWindowFlags_NoMove);
             ImGui::Text("Enter the URLs of the websites you would\nlike to be blocked whilst the app is open.");
             ImGui::Dummy(ImVec2(0, 10));
             ImGui::Text("Note: submitting a blocklist will reset your\ntimer. This is by design so you don't keep\nfiddling with it.");
@@ -172,7 +173,7 @@ namespace EngineUI {
         //Stats
         if (windowState["showStats"]) {
 
-            ImGui::Begin("Stats");
+            ImGui::Begin("Stats", 0,  ImGuiWindowFlags_NoMove);
             if (ImGui::IsWindowAppearing()) refreshGraphData();
             
 
@@ -265,9 +266,40 @@ namespace EngineUI {
             ImGui::End();
         }
 
+        if (windowState["showSettings"]) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
+            ImGui::Begin("Settings", 0, ImGuiWindowFlags_NoMove);
+
+            /*
+            if (ImGui::BeginTable("split", 3))
+            {
+                bool test;
+                ImGui::TableNextColumn(); ImGui::Checkbox("Example 1", &test);
+                ImGui::TableNextColumn(); ImGui::Checkbox("Example 2", &test);
+                ImGui::TableNextColumn(); ImGui::Checkbox("Example 3", &test);
+
+                ImGui::EndTable();
+            }
+            */
+
+            std::string versionId = "WorkPal3000 V" + WorkPal3000::version;
+            ImGui::Text(versionId.c_str());
+            ImGui::Dummy(ImVec2(0, 20));
+            char buf[256] = "support@unseenforms.com";
+            ImGui::Text("For bugs, support or anything else:");
+            ImGui::Dummy(ImVec2(0, 5));
+            ImGui::SetNextItemWidth(320); // set width of next item
+            ImGui::InputText("##email", buf, IM_ARRAYSIZE(buf), ImGuiInputTextFlags_ReadOnly);
+
+
+            ImGui::PopStyleVar();
+            ImGui::End();
+        }
+
+
         //Timer
         if (windowState["showTimer"]) {
-            ImGui::Begin("Time");
+            ImGui::Begin("Time", 0, ImGuiWindowFlags_NoMove);
 
             isRobotSleeping = WorkPal3000::isIdling;
 
@@ -277,9 +309,22 @@ namespace EngineUI {
 
             //Robot blinking
             auto now = std::chrono::steady_clock::now();
+            /*
             if (std::chrono::duration_cast<std::chrono::seconds>(now - lastBlinkTime).count() > 1) { // Change the number to adjust the blink speed
                 robotOpenEyes = false;
                 lastBlinkTime = now;
+            }
+            */
+            if (isRobotIdle) {
+
+                if (robotOpenEyes == false && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastBlinkTime).count() > 200) { //Change to adjust blink length
+                    robotOpenEyes = true;
+                }
+                
+                if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastBlinkTime).count() > 2000) { // Change the number to adjust the blink intervals
+                    lastBlinkTime = now;
+                    robotOpenEyes = false;
+                }
             }
 
             //Robot snoozing
@@ -418,13 +463,6 @@ namespace EngineUI {
                 textPos.x = (windowSize.x - ImGui::CalcTextSize(WorkPal3000::getElapsedTime().c_str()).x) * 0.5f;
                 ImGui::SetCursorPos(textPos);
                 ImGui::Text(WorkPal3000::getElapsedTime().c_str());
-
-                //Robot blink frames
-                if (!robotOpenEyes)robotBlinkFrames++;
-                if (!robotOpenEyes && robotBlinkFrames > 300) {
-                    robotOpenEyes = true;
-                    robotBlinkFrames = 0;
-                }
             }
 
             
@@ -432,6 +470,7 @@ namespace EngineUI {
             ImGui::End();
         }
 
+    
 
 
 

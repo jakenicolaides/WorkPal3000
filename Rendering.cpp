@@ -13,6 +13,7 @@
 #include <iostream>
 #include "EngineUI.h"
 
+
 static const int numEntities = 100;
 
 struct Entities {
@@ -315,6 +316,8 @@ namespace Rendering {
         bool isQuestConnected = false;
 
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        const int target_fps_in_focus = 100; // adjust this for your desired frame rate when in focus
+        const int target_fps_out_focus = 10; // adjust this for your desired frame rate when out of focus
 
         EngineUI::initUI();
 
@@ -341,6 +344,17 @@ namespace Rendering {
             
 
             drawFrame();
+
+            // Check if window is in focus
+
+           if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
+                // Window is in focus, sleep to meet target frame rate
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000 / target_fps_in_focus));
+            }
+            else {
+                // Window is not in focus, sleep to meet lower target frame rate
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000 / target_fps_out_focus));
+            }
 
         }
 
@@ -1154,6 +1168,7 @@ namespace Rendering {
         endSingleTimeCommands(commandBuffer);
     }
 
+ 
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -1807,6 +1822,22 @@ namespace Rendering {
         
       
     }
+
+    //WorkPal3000 functions
+
+    void flashWindowsEx() {
+        HWND hwnd = glfwGetWin32Window(window);
+        ShowWindow(hwnd, SW_RESTORE);
+        FLASHWINFO fi;
+        fi.cbSize = sizeof(FLASHWINFO);
+        fi.hwnd = hwnd;
+        fi.dwFlags = FLASHW_TRAY | FLASHW_TIMERNOFG; // Flash taskbar button and keep flashing until it gets focus
+        fi.uCount = 0; // Flash indefinitely
+        fi.dwTimeout = 0; // Use default cursor blink rate
+
+        FlashWindowEx(&fi);
+    }
+
 
 
 
