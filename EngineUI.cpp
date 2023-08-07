@@ -17,6 +17,9 @@ namespace EngineUI {
     static double weekData[7] = { 0,0,0,0,0,0,0 };
     static double monthData[4] = {0,0,0,0};
     static double yearData[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+    char emailBuffer[200] = { 0 };
+    char passwordBuffer[200] = {0};
+
 
     //Robot vars
 
@@ -37,11 +40,20 @@ namespace EngineUI {
     
 
     void initUI() {
-        windowState["showDemoWindow"] = false;
-        windowState["showBlockList"] = true;
-        windowState["showStats"] = true;
-        windowState["showSettings"] = true;
-        windowState["showTimer"] = true;
+
+        if (WorkPal3000::needsOneTimeSetup) {
+            windowState["showSetup"] = true;
+        }
+        else if (!WorkPal3000::subscriptionActive) {
+            windowState["showSubscription"] = true;
+        }else{
+            windowState["showDemoWindow"] = true;
+            windowState["showBlockList"] = true;
+            windowState["showStats"] = true;
+            windowState["showSettings"] = true;
+            windowState["showTimer"] = true;
+            windowState["showSetup"] = false;
+        }
         
         ImGui::StyleColorsClassic();
         
@@ -270,22 +282,19 @@ namespace EngineUI {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
             ImGui::Begin("Settings", 0, ImGuiWindowFlags_NoMove);
 
-            /*
-            if (ImGui::BeginTable("split", 3))
-            {
-                bool test;
-                ImGui::TableNextColumn(); ImGui::Checkbox("Example 1", &test);
-                ImGui::TableNextColumn(); ImGui::Checkbox("Example 2", &test);
-                ImGui::TableNextColumn(); ImGui::Checkbox("Example 3", &test);
+            // Using the _simplified_ one-liner Combo() api here
+           // See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
 
-                ImGui::EndTable();
-            }
-            */
+            const char* items[] = { "Off", "white-noise", "brown-noise", "rainy-window", "waves", "cafe", "woodland", "air-conditioner" };
+            static int item_current = 0;
+            std::string filename = std::to_string(*items[item_current]);
+            WorkPal3000::musicFile = filename;
+            ImGui::Combo("Ambient Sound", &item_current, items, IM_ARRAYSIZE(items));
 
             std::string versionId = "WorkPal3000 V" + WorkPal3000::version;
             ImGui::Text(versionId.c_str());
             ImGui::Dummy(ImVec2(0, 20));
-            char buf[256] = "support@unseenforms.com";
+            char buf[256] = "support@workpal3000.com";
             ImGui::Text("For bugs, support or anything else:");
             ImGui::Dummy(ImVec2(0, 5));
             ImGui::SetNextItemWidth(320); // set width of next item
@@ -470,9 +479,41 @@ namespace EngineUI {
             ImGui::End();
         }
 
-    
+        if (windowState["showSetup"]) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15 , 15));
+            ImGui::Begin("Setup", 0, ImGuiWindowFlags_NoMove);
+            ImGui::Text("Please sign in to start using WorkPal3000.\nThis is just to verify your subscription.\nThis is a one time sign in.");
 
+            ImGui::InputTextWithHint("##emailStartup", "Email Address", emailBuffer, IM_ARRAYSIZE(emailBuffer));
+            ImGui::InputTextWithHint("##passwordStartup", "Password", passwordBuffer, IM_ARRAYSIZE(passwordBuffer), ImGuiInputTextFlags_Password);
 
+            if (ImGui::Button("Sign In")) {
+                WorkPal3000::oneTimeSignIn(emailBuffer, passwordBuffer);
+            }
+
+            if (WorkPal3000::invalidLogin) {
+                ImGui::Dummy(ImVec2(0, 20));
+                ImGui::Text("Invalid Login.\nYour email address or password were incorrect.\nPlease try again or reset your password.");
+                if (ImGui::Button("Reset Password")) ShellExecute(0, 0, L"https://workpal3000.com/reset-password-request.php", 0, 0, SW_SHOW);
+                
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::End();
+        }
+
+        if (windowState["showSubscription"]) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
+            ImGui::Begin("Subscription", 0);
+           
+            ImGui::Text("Your subscription is no longer active. This is\nlikely because you cancelled or because your\npayment method has failed.");
+            ImGui::Dummy(ImVec2(0, 20));
+            ImGui::Text("Use the link below to manage your subscription.");
+            ImGui::Dummy(ImVec2(0, 20));
+            if (ImGui::Button("Manage Subscription")) ShellExecute(0, 0, L"https://workpal3000.com/login.php", 0, 0, SW_SHOW);
+            ImGui::PopStyleVar();
+            ImGui::End();
+        }
 
 
 

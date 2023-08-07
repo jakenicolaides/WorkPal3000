@@ -1,10 +1,24 @@
+#define CURL_STATICLIB
+#define SFML_STATIC
 #include "WorkPal3000.h"
+#include "curl.h"
+
+#pragma comment (lib, "Normaliz.lib")
+#pragma comment (lib, "Ws2_32.lib")
+#pragma comment (lib, "Wldap32.lib")
+#pragma comment (lib, "Crypt32.lib")
+#pragma comment (lib, "advapi32.lib")
 
 namespace WorkPal3000 {
 
     //Global variables
     bool isIdling = false;
     std::string version = "1.0.0";
+    bool needsOneTimeSetup = true;
+    bool invalidLogin = false;
+    bool subscriptionActive = false;
+    std::string musicFile = "rainy-window";
+    std::mutex musicFileMutex;
 
     //Private variables
     std::chrono::duration<double> elapsedTime;
@@ -20,6 +34,37 @@ namespace WorkPal3000 {
     const std::string hostsFileStart = "# WorkPal3000 - Start";
     const std::string hostsFileEnd = "# WorkPal3000 - End";
     
+    void playMusic() {
+        sf::Music music;
+        std::string lastPlayed = "";
+
+        while (true) {
+            std::string musicFilename;
+
+            {
+                std::lock_guard<std::mutex> lock(musicFileMutex);
+                musicFilename = musicFile;
+            }
+
+            if (musicFilename != "" && musicFilename != lastPlayed) {
+                if (music.openFromFile("Assets/" + musicFilename + ".wav")) {
+                    music.play();
+                    lastPlayed = musicFilename;
+                }
+                else {
+                    std::cout << "Error loading the file: " << musicFilename << std::endl;
+                }
+            }
+
+            while (music.getStatus() == sf::Music::Playing) {
+                sf::sleep(sf::seconds(0.1f));
+            }
+
+            sf::sleep(sf::seconds(0.5f));
+        }
+    }
+
+
    
     void timerThread(const std::chrono::high_resolution_clock::time_point& startTime) {
         std::chrono::high_resolution_clock::time_point lastTime = startTime;
@@ -490,20 +535,30 @@ namespace WorkPal3000 {
         std::string filename = "userdata.json"; // The file where the data will be stored
         nlohmann::json userData;
 
-        //Get the current date
-        auto now = std::chrono::system_clock::now();
-        auto in_time_t = std::chrono::system_clock::to_time_t(now);
-        std::tm tm;
-        localtime_s(&tm, &in_time_t);
-        std::ostringstream oss;
-        oss << std::put_time(&tm, "%Y-%m-%d");
-        currentDate = oss.str();
-
+  
         // Try to open the file to read the data
         std::ifstream inFile(filename);
         if (inFile.is_open()) {
+
+            //Get the current date
+            auto now = std::chrono::system_clock::now();
+            auto in_time_t = std::chrono::system_clock::to_time_t(now);
+            std::tm tm;
+            localtime_s(&tm, &in_time_t);
+            std::ostringstream oss;
+            oss << std::put_time(&tm, "%Y-%m-%d");
+            currentDate = oss.str();
+
+            needsOneTimeSetup = false;
             inFile >> userData;
             std::string name = userData["name"].get<std::string>(); // Extract name as std::string
+            std::string key = userData["application_key"];
+
+            // Allocate memory for char array including null terminator
+            char* keyChar = new char[key.length() + 1];
+            strcpy_s(keyChar, key.length() + 1, key.c_str());
+            validateSubscription(keyChar);
+            delete[] keyChar;
 
             //Get the blocklist & add it to the hosts file
             if (userData.contains("blocklist")) {
@@ -519,34 +574,132 @@ namespace WorkPal3000 {
                 totalElapsedTime = std::chrono::duration<double>( std::stod(durationString) );
             }
 
-        }
-        else {
-            userData["name"] = "Jake";
+            //Start the timers
+            beginThreads();
 
-            // Write the data to the file
-            std::ofstream outFile(filename);
-            if (outFile.is_open()) {
-                outFile << userData;
-            }
-            else {
-                std::cerr << "Error: Unable to open file for writing.\n";
-            }
         }
+        else { //user data file doesnt exist
+            needsOneTimeSetup = true;
+        }
+
+       
+        
+
+        
 
     }
 
-    void start() {
+    // Callback to handle the server's response
+    size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+        ((std::string*)userp)->append((char*)contents, size * nmemb);
+        return size * nmemb;
+    }
 
-        setup();
 
-        std::thread timer = startTimer();
-        std::thread inactivityChecker(checkInactivityThread);
-
-        inactivityChecker.detach();
-        timer.detach();  
-
+    void oneTimeSignIn(const char* email, const char* password) {
 
         
+        CURL* curl;
+        CURLcode res;
+        std::string readBuffer;
+
+        curl = curl_easy_init();
+        if (curl) {
+
+            char* encodedEmail = curl_easy_escape(curl, email, strlen(email));
+            char* encodedPassword = curl_easy_escape(curl, password, strlen(password));
+            std::string postFields = "email=" + std::string(encodedEmail) + "&password=" + std::string(encodedPassword);
+            std::string contentLengthHeader = "Content-Length: " + std::to_string(postFields.length());
+            curl_free(encodedEmail);
+            curl_free(encodedPassword);
+           
+            curl_easy_setopt(curl, CURLOPT_URL, "https://workpal3000.com/one-time-setup.php");
+            curl_easy_setopt(curl, CURLOPT_POST, 1);
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postFields.length());
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "MyApp/1.0");
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+
+            // Set headers
+            struct curl_slist* headers = NULL;
+            headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+            // headers = curl_slist_append(headers, contentLengthHeader.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+            res = curl_easy_perform(curl);
+            if (res != CURLE_OK) {
+                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+            }
+            else {
+
+                auto jsonResponse = nlohmann::json::parse(readBuffer.c_str());
+                curl_slist_free_all(headers);
+
+                // Check if the response contains a token or an error
+                if (jsonResponse.contains("application_key")) {
+                    std::string application_key = jsonResponse["application_key"];
+                    std::string name = jsonResponse["name"];
+                    std::cout << "Received token: " << application_key << "\nUsername: " << name << std::endl;
+                    // Handle successful authentication here
+
+                    std::string filename = "userdata.json"; // The file where the data will be stored
+                    nlohmann::json userData;
+
+                    //Get the current date
+                    auto now = std::chrono::system_clock::now();
+                    auto in_time_t = std::chrono::system_clock::to_time_t(now);
+                    std::tm tm;
+                    localtime_s(&tm, &in_time_t);
+                    std::ostringstream oss;
+                    oss << std::put_time(&tm, "%Y-%m-%d");
+                    currentDate = oss.str();
+
+
+                    userData["name"] = name;
+                    userData["application_key"] = application_key;
+
+                    // Write the data to the file
+                    std::ofstream outFile(filename);
+                    if (outFile.is_open()) {
+                        outFile << userData;
+                        validateSubscription(application_key.c_str());
+                        needsOneTimeSetup = false;
+                        EngineUI::initUI();
+                        beginThreads();
+                    }
+                    else {
+                        std::cerr << "Error: Unable to open file for writing.\n";
+                    }
+
+                }
+                else if (jsonResponse.contains("error")) {
+                    std::string error = jsonResponse["error"];
+                    std::cerr << "Error: " << error << std::endl;
+                    // Handle authentication error here
+                    invalidLogin = true;
+                }
+                
+                
+                
+            }
+
+            curl_easy_cleanup(curl);
+        }
+        
+
+    }
+
+    void beginThreads() {
+        std::thread musicThread(playMusic);
+        std::thread timer = startTimer();
+        std::thread inactivityChecker(checkInactivityThread);
+        inactivityChecker.detach();
+        musicThread.detach();
+        timer.detach();
     }
 
     void clearHostsFile()
@@ -579,14 +732,83 @@ namespace WorkPal3000 {
 
         system("ipconfig /flushdns");
     }
+
+    void validateSubscription(const char* applicationKey) {
+
+        CURL* curl;
+        CURLcode res;
+        std::string readBuffer;
+
+        curl = curl_easy_init();
+        if (curl) {
+
+            char* encodedApplicationKey = curl_easy_escape(curl, applicationKey, strlen(applicationKey));
+            std::string postFields = "application_key=" + std::string(applicationKey);
+            std::string contentLengthHeader = "Content-Length: " + std::to_string(postFields.length());
+            curl_free(encodedApplicationKey);
+
+            curl_easy_setopt(curl, CURLOPT_URL, "https://workpal3000.com/subscription-validation.php");
+            curl_easy_setopt(curl, CURLOPT_POST, 1);
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postFields.length());
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "MyApp/1.0");
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); 
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+
+            // Set headers
+            struct curl_slist* headers = NULL;
+            headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+            // headers = curl_slist_append(headers, contentLengthHeader.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+            res = curl_easy_perform(curl);
+            if (res != CURLE_OK) {
+                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+            }
+            else {
+
+                auto jsonResponse = nlohmann::json::parse(readBuffer.c_str());
+                curl_slist_free_all(headers);
+
+                // Check if the response contains a token or an error
+                if (jsonResponse.contains("subscription_active")) {
+                    std::string subscriptionActiveResult = jsonResponse["subscription_active"];
+                    if (subscriptionActiveResult == "false") {
+                        subscriptionActive = false;
+                    }
+                    else if (subscriptionActiveResult == "true") {
+                        subscriptionActive = true;
+                    }
+                }
+                else if (jsonResponse.contains("error")) {
+                    std::string error = jsonResponse["error"];
+                    std::cerr << "Error: " << error << std::endl;
+                    // Handle authentication error here
+                    invalidLogin = true;
+                }
+
+
+
+            }
+
+            curl_easy_cleanup(curl);
+        }
+    }
 }
 
 int main()
 {
-   ShowWindow(GetConsoleWindow(), SW_HIDE);
-   WorkPal3000::start();
+    
+   //ShowWindow(GetConsoleWindow(), SW_HIDE);
+
+   WorkPal3000::setup();
    Rendering::start();
    atexit(WorkPal3000::clearHostsFile);
+  
+   
    return 0;
 
 }

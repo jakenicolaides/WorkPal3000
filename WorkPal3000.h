@@ -13,6 +13,7 @@
 #define WM_APP_QUIT (WM_APP + 1)
 #include "Rendering.h"
 #include "EngineUI.h"
+#include "SFML/Audio.hpp"
 
 namespace WorkPal3000 {
 
@@ -20,6 +21,10 @@ namespace WorkPal3000 {
     extern std::vector<std::string> blocklist;
     extern bool keepRunning;
     extern std::string version;
+    extern bool needsOneTimeSetup;
+    extern bool invalidLogin;
+    extern bool subscriptionActive;
+    extern std::string musicFile;
 
     void timerThread(const std::chrono::high_resolution_clock::time_point& startTime);
     double getSecondsOnDate(std::string date);
@@ -27,6 +32,8 @@ namespace WorkPal3000 {
     void printElapsedTime();
     std::string getElapsedTime();
     void start();
+    void playMusic();
+    void beginThreads();
     void submitIdleResult(bool wasWorking);
     std::string getIdleTime();
     void addUrlsToHostsFile(const std::vector<std::string>& urls);
@@ -37,6 +44,9 @@ namespace WorkPal3000 {
     void addUrlToBlockList(std::string url, int i);
     void submitBlocklist(std::vector<std::string> newBlocklist);
     void setup();
+    void validateSubscription(const char* applicationKey);
+    void oneTimeSignIn(const char* email, const char* password);
+    size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
     void saveTime();
     std::vector<std::string> getDatesInWeek(int weekNumber);
     int currentWeekOfYear();

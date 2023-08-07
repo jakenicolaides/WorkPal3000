@@ -31,6 +31,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -38,12 +39,14 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +54,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,15 +80,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\IMGUI;C:\VulkanSDK\1.3.239.0\Include;C:\GLFW\include\GLFW;C:\GLM\glm;C:\STB;C:\TinyOBJ;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\include;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\include\curl;$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.239.0\Lib;C:\VulkanSDK\1.3.239.0\Lib;C:\GLFW\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\lib;C:\VulkanSDK\1.3.239.0\Lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\GLFW\lib-vc2022</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a_debug.lib;vulkan-1.lib;glfw3.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -95,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\IMGUI;C:\VulkanSDK\1.3.239.0\Include;C:\GLFW\include\GLFW;C:\GLM\glm;C:\STB;C:\TinyOBJ;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\include;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\include\curl;$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -104,8 +108,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.239.0\Lib;C:\VulkanSDK\1.3.239.0\Lib;C:\GLFW\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\lib;C:\VulkanSDK\1.3.239.0\Lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\GLFW\lib-vc2022</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a_debug.lib;vulkan-1.lib;glfw3.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,15 +118,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\include;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\include\curl;$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.239.0\Lib;C:\VulkanSDK\1.3.239.0\Lib;$(ProjectDir)\Vendors\GLFW\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\lib;C:\VulkanSDK\1.3.239.0\Lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\GLFW\lib-vc2022</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a_debug.lib;vulkan-1.lib;glfw3.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
@@ -134,7 +138,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\include;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\include\curl;$(ProjectDir)\Vendors\VMA\include;$(ProjectDir)Vendors\NLOHMANN\include;$(ProjectDir)\Vendors\IMGUI;C:\VulkanSDK\1.3.239.0\Include;$(ProjectDir)\Vendors\GLFW\include\GLFW;$(ProjectDir)\Vendors\GLM\glm;$(ProjectDir)\Vendors\STB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -143,8 +147,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.239.0\Lib;C:\VulkanSDK\1.3.239.0\Lib;$(ProjectDir)\Vendors\GLFW\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\jaken\source\repos\WorkPal3000\Vendors\SFML\lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\CURL\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\lib;C:\VulkanSDK\1.3.239.0\Lib;C:\Users\jaken\source\repos\WorkPal3000\Vendors\GLFW\lib-vc2022</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a_debug.lib;vulkan-1.lib;glfw3.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
