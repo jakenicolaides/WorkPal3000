@@ -24,15 +24,18 @@ namespace WorkPal3000 {
     extern bool needsOneTimeSetup;
     extern bool invalidLogin;
     extern bool subscriptionActive;
-    extern std::string musicFile;
+    extern std::string ambientSoundFile;
+    extern std::mutex ambientSoundMutex;
+    extern int idleDuration;
+    extern int intervalDuration;
+    extern bool playIntervalSounds;
 
     void timerThread(const std::chrono::high_resolution_clock::time_point& startTime);
     double getSecondsOnDate(std::string date);
     std::thread startTimer();
     void printElapsedTime();
     std::string getElapsedTime();
-    void start();
-    void playMusic();
+    void playAmbientSound();
     void beginThreads();
     void submitIdleResult(bool wasWorking);
     std::string getIdleTime();

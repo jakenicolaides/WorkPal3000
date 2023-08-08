@@ -17,8 +17,12 @@ namespace WorkPal3000 {
     bool needsOneTimeSetup = true;
     bool invalidLogin = false;
     bool subscriptionActive = false;
-    std::string musicFile = "rainy-window";
-    std::mutex musicFileMutex;
+    std::string ambientSoundFile = "none";
+    std::string currentlyPlayingAmbientSoundFile = "none";
+    std::mutex ambientSoundMutex;
+    int idleDuration = 1;
+    int intervalDuration = 1;
+    bool playIntervalSounds = true;
 
     //Private variables
     std::chrono::duration<double> elapsedTime;
@@ -27,40 +31,50 @@ namespace WorkPal3000 {
     std::mutex cv_m;
     std::condition_variable cv;
     DWORD idleTime;
-    int idleDuration = 1;
     const std::string HOSTS_FILE_PATH = "C:\\Windows\\System32\\drivers\\etc\\hosts";
     std::vector<std::string> blocklist = {};
     std::string currentDate;
     const std::string hostsFileStart = "# WorkPal3000 - Start";
     const std::string hostsFileEnd = "# WorkPal3000 - End";
+    bool intervalHappened = false;
     
-    void playMusic() {
-        sf::Music music;
-        std::string lastPlayed = "";
+    void playAmbientSound() {
+        sf::Music ambientSound;
+        sf::Music intervalSound;
 
+        if (!ambientSound.openFromFile("Assets/"+ambientSoundFile)) std::cerr << "Error loading the file!" << std::endl;
+       
+
+        // Play the ambientSound
+        if (ambientSoundFile != "none") {
+            ambientSound.play();
+            ambientSound.setLoop(true);
+        }
+
+
+        // Keep the thread running while the ambientSound is playing
         while (true) {
-            std::string musicFilename;
-
-            {
-                std::lock_guard<std::mutex> lock(musicFileMutex);
-                musicFilename = musicFile;
-            }
-
-            if (musicFilename != "" && musicFilename != lastPlayed) {
-                if (music.openFromFile("Assets/" + musicFilename + ".wav")) {
-                    music.play();
-                    lastPlayed = musicFilename;
+            if (currentlyPlayingAmbientSoundFile != ambientSoundFile) {
+                if (ambientSound.getStatus() == sf::Music::Playing) ambientSound.stop();
+                if (ambientSoundFile != "none") {
+                    ambientSound.openFromFile("Assets/" + ambientSoundFile);
+                    ambientSound.play();
+                    ambientSound.setLoop(true);
                 }
-                else {
-                    std::cout << "Error loading the file: " << musicFilename << std::endl;
-                }
+                currentlyPlayingAmbientSoundFile = ambientSoundFile;
             }
-
-            while (music.getStatus() == sf::Music::Playing) {
-                sf::sleep(sf::seconds(0.1f));
+            if (intervalHappened) {
+                std::cout << "Interval Triggered" << std::endl;
+                intervalSound.openFromFile("Assets/interval-chime.wav");
+                intervalSound.play();
+                intervalSound.setLoop(false);
+                flashWindow();
+                ImGui::SetWindowFocus("Time");
+                ambientSoundMutex.lock();
+                intervalHappened = false;
+                ambientSoundMutex.unlock();
             }
-
-            sf::sleep(sf::seconds(0.5f));
+            sf::sleep(sf::seconds(0.1f));
         }
     }
 
@@ -80,6 +94,14 @@ namespace WorkPal3000 {
 
             saveTime();
 
+            if (playIntervalSounds) {
+                int32_t totalTime = static_cast<int32_t>(std::floor(totalElapsedTime.count()));
+                if (totalTime % (intervalDuration * 60) == 0) {
+                    ambientSoundMutex.lock();
+                    intervalHappened = true;
+                    ambientSoundMutex.unlock();
+                }
+            }
         }
     }
 
@@ -155,6 +177,7 @@ namespace WorkPal3000 {
 
         return dates;
     }
+
 
 
 
@@ -235,6 +258,7 @@ namespace WorkPal3000 {
                 flashWindow();
                 ImGui::SetWindowFocus("Time");
             }
+
         }
     }
 
@@ -530,64 +554,7 @@ namespace WorkPal3000 {
     }
 
 
-    void setup() {
-      
-        std::string filename = "userdata.json"; // The file where the data will be stored
-        nlohmann::json userData;
-
-  
-        // Try to open the file to read the data
-        std::ifstream inFile(filename);
-        if (inFile.is_open()) {
-
-            //Get the current date
-            auto now = std::chrono::system_clock::now();
-            auto in_time_t = std::chrono::system_clock::to_time_t(now);
-            std::tm tm;
-            localtime_s(&tm, &in_time_t);
-            std::ostringstream oss;
-            oss << std::put_time(&tm, "%Y-%m-%d");
-            currentDate = oss.str();
-
-            needsOneTimeSetup = false;
-            inFile >> userData;
-            std::string name = userData["name"].get<std::string>(); // Extract name as std::string
-            std::string key = userData["application_key"];
-
-            // Allocate memory for char array including null terminator
-            char* keyChar = new char[key.length() + 1];
-            strcpy_s(keyChar, key.length() + 1, key.c_str());
-            validateSubscription(keyChar);
-            delete[] keyChar;
-
-            //Get the blocklist & add it to the hosts file
-            if (userData.contains("blocklist")) {
-                blocklist = userData["blocklist"];
-                addUrlsToHostsFile(blocklist);
-            }
-
-           
-
-            //Get the current seconds
-            if (userData["timeData"].contains(currentDate)){
-                std::string durationString = userData["timeData"][currentDate];
-                totalElapsedTime = std::chrono::duration<double>( std::stod(durationString) );
-            }
-
-            //Start the timers
-            beginThreads();
-
-        }
-        else { //user data file doesnt exist
-            needsOneTimeSetup = true;
-        }
-
-       
-        
-
-        
-
-    }
+    
 
     // Callback to handle the server's response
     size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -693,14 +660,7 @@ namespace WorkPal3000 {
 
     }
 
-    void beginThreads() {
-        std::thread musicThread(playMusic);
-        std::thread timer = startTimer();
-        std::thread inactivityChecker(checkInactivityThread);
-        inactivityChecker.detach();
-        musicThread.detach();
-        timer.detach();
-    }
+    
 
     void clearHostsFile()
     {
@@ -797,7 +757,74 @@ namespace WorkPal3000 {
             curl_easy_cleanup(curl);
         }
     }
+
+    void beginThreads() {
+        std::thread ambientSoundThread(playAmbientSound);
+        std::thread timer = startTimer();
+        std::thread inactivityChecker(checkInactivityThread);
+        inactivityChecker.detach();
+        ambientSoundThread.detach();
+        timer.detach();
+    }
+
+
+    void setup() {
+
+        std::string filename = "userdata.json"; // The file where the data will be stored
+        nlohmann::json userData;
+
+
+        // Try to open the file to read the data
+        std::ifstream inFile(filename);
+        if (inFile.is_open()) {
+
+            //Get the current date
+            auto now = std::chrono::system_clock::now();
+            auto in_time_t = std::chrono::system_clock::to_time_t(now);
+            std::tm tm;
+            localtime_s(&tm, &in_time_t);
+            std::ostringstream oss;
+            oss << std::put_time(&tm, "%Y-%m-%d");
+            currentDate = oss.str();
+
+            needsOneTimeSetup = false;
+            inFile >> userData;
+            std::string name = userData["name"].get<std::string>(); // Extract name as std::string
+            std::string key = userData["application_key"];
+
+            if (userData.contains("idleDuration"))idleDuration = userData["idleDuration"].get<int>();
+            if (userData.contains("playIntervalSounds")) playIntervalSounds = userData["playIntervalSounds"].get<bool>();
+            if (userData.contains("intervalDuration")) intervalDuration = userData["intervalDuration"].get<int>();
+            if (userData.contains("ambientSoundFile")) ambientSoundFile = userData["ambientSoundFile"].get<std::string>();
+
+            // Allocate memory for char array including null terminator
+            char* keyChar = new char[key.length() + 1];
+            strcpy_s(keyChar, key.length() + 1, key.c_str());
+            validateSubscription(keyChar);
+            delete[] keyChar;
+
+            //Get the blocklist & add it to the hosts file
+            if (userData.contains("blocklist")) {
+                blocklist = userData["blocklist"];
+                addUrlsToHostsFile(blocklist);
+            }
+
+            //Get the current seconds
+            if (userData["timeData"].contains(currentDate)) {
+                std::string durationString = userData["timeData"][currentDate];
+                totalElapsedTime = std::chrono::duration<double>(std::stod(durationString));
+            }
+
+            //Start the timers
+            beginThreads();
+        }
+        else { //user data file doesnt exist
+            needsOneTimeSetup = true;
+        }
+    }
 }
+
+
 
 int main()
 {

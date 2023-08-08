@@ -19,6 +19,7 @@ namespace EngineUI {
     static double yearData[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
     char emailBuffer[200] = { 0 };
     char passwordBuffer[200] = {0};
+    nlohmann::json userData;
 
 
     //Robot vars
@@ -37,6 +38,10 @@ namespace EngineUI {
     std::chrono::time_point<std::chrono::steady_clock> lastWaveTime;
     bool isRobotWaving = false;
     int robotWaveStage = 0;
+
+    static int soundFileIndex = 0;
+    const char* soundFileNames[] = { "none", "white-noise.wav", "brown-noise.mp3", "rainy-window.wav", "ocean-waves.mp3", "cafe.wav", "woodland.wav", "air-conditioner.wav" };
+
     
 
     void initUI() {
@@ -60,9 +65,21 @@ namespace EngineUI {
         // Get a reference to the current ImGui style
         ImGuiStyle& style = ImGui::GetStyle();
 
+        std::ifstream inFile("userdata.json");
+        if (inFile.is_open()) {
+            inFile >> userData;
+            if (userData.contains("ambientSoundFile")) {
+                size_t length = sizeof(soundFileNames) / sizeof(soundFileNames[0]);
+                for (size_t i = 0; i < length; i++) {
+                    std::string thisSoundFile = soundFileNames[i];
+                    if (thisSoundFile == userData["ambientSoundFile"].get<std::string>()) soundFileIndex = i;
+                }
+            }
+        }
+
         // Change the color for the window background
         // The parameters for ImVec4 are (r, g, b, a) -- all between 0.0f and 1.0f
-       // style.Colors[ImGuiCol_WindowBg] = ImVec4(0.882f, 0.69f, 1.0f, 1.0f);
+        // style.Colors[ImGuiCol_WindowBg] = ImVec4(0.882f, 0.69f, 1.0f, 1.0f);
         //style.Colors[ImGuiCol_Text] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);  //
 
     }
@@ -115,7 +132,6 @@ namespace EngineUI {
     }
 
     std::map<std::string, bool> loopUI(bool& applicationOpen, float& cameraSpeed, float& fov, bool& firstMouse) {
-
 
         //Docking
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -284,13 +300,69 @@ namespace EngineUI {
 
             // Using the _simplified_ one-liner Combo() api here
            // See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
+           
+            std::string filename = soundFileNames[soundFileIndex];
+            if (filename != WorkPal3000::ambientSoundFile) {
+                WorkPal3000::ambientSoundMutex.lock();
+                WorkPal3000::ambientSoundFile = filename;
+                WorkPal3000::ambientSoundMutex.unlock();
+                std::cout << "Changing the wav" << std::endl;
+                //save changes
+                std::ifstream inFile("userdata.json");
+                if (inFile.is_open()) {
+                    inFile >> userData;
+                    userData["ambientSoundFile"] = WorkPal3000::ambientSoundFile;
+                }
+                std::ofstream outFile("userdata.json");
+                if (outFile.is_open()) outFile << userData;
+            }
+            ImGui::Combo("Ambient Sound", &soundFileIndex, soundFileNames, IM_ARRAYSIZE(soundFileNames));
+            if (ImGui::InputInt("Minutes to Idle", &WorkPal3000::idleDuration)) {
+                // If the value was modified, we clamp it
+                WorkPal3000::idleDuration = std::clamp(WorkPal3000::idleDuration, 1, 1440);
+                //save changes
+                std::ifstream inFile("userdata.json");
+                if (inFile.is_open()) {
+                    inFile >> userData;
+                    userData["idleDuration"] = WorkPal3000::idleDuration;
+                }
+                std::ofstream outFile("userdata.json");
+                if (outFile.is_open()) outFile << userData;
+            }
 
-            const char* items[] = { "Off", "white-noise", "brown-noise", "rainy-window", "waves", "cafe", "woodland", "air-conditioner" };
-            static int item_current = 0;
-            std::string filename = std::to_string(*items[item_current]);
-            WorkPal3000::musicFile = filename;
-            ImGui::Combo("Ambient Sound", &item_current, items, IM_ARRAYSIZE(items));
+            if (ImGui::Checkbox("Play Interval Sounds", &WorkPal3000::playIntervalSounds)) {
 
+                //save changes
+                std::ifstream inFile("userdata.json");
+                if (inFile.is_open()) {
+                    inFile >> userData;
+                    userData["playIntervalSounds"] = WorkPal3000::playIntervalSounds;
+                }
+                std::ofstream outFile("userdata.json");
+                if (outFile.is_open()) outFile << userData;
+            }
+
+            if (WorkPal3000::playIntervalSounds) {
+
+                if (ImGui::InputInt("Interval Duration", &WorkPal3000::intervalDuration)) {
+                    // If the value was modified, we clamp it
+                    WorkPal3000::intervalDuration = std::clamp(WorkPal3000::intervalDuration, 1, 1440);
+
+                    //save changes
+                    std::ifstream inFile("userdata.json");
+                    if (inFile.is_open()) {
+                        inFile >> userData;
+                        userData["intervalDuration"] = WorkPal3000::intervalDuration;
+                    }
+                    std::ofstream outFile("userdata.json");
+                    if (outFile.is_open()) outFile << userData;
+
+                }
+            }
+            
+            
+
+            ImGui::Dummy(ImVec2(0, 200));
             std::string versionId = "WorkPal3000 V" + WorkPal3000::version;
             ImGui::Text(versionId.c_str());
             ImGui::Dummy(ImVec2(0, 20));
