@@ -25,20 +25,13 @@ struct Entities {
 };
 
 #define VMA_IMPLEMENTATION
-//#include "vk_mem_alloc.h"
 
-//#define STB_IMAGE_IMPLEMENTATION
-//#include <stb_image.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 //#include <tiny_obj_loader.h>
 
-// Define these only in *one* .cc file.
-#define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
-//#include "tiny_gltf.h"
+#include <stb_image.h>
 
 namespace Rendering {
 
@@ -196,7 +189,15 @@ namespace Rendering {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // This line prevents window resizing
 
-        window = glfwCreateWindow(WIDTH, HEIGHT, "WorkPal 3000" , nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "WorkPal3000" , nullptr, nullptr);
+
+        // Load icon
+        GLFWimage icon = load_icon("icon.png");
+
+        // Set the window icon
+        glfwSetWindowIcon(window, 1, &icon);
+
+
         //glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
@@ -1837,6 +1838,25 @@ namespace Rendering {
 
         FlashWindowEx(&fi);
     }
+
+
+
+    GLFWimage load_icon(const char* path) {
+        GLFWimage image;
+        int channels;
+
+        
+        // Load the image
+        image.pixels = stbi_load(path, &image.width, &image.height, &channels, 4); // 4 for RGBA
+        if (!image.pixels) {
+            fprintf(stderr, "Failed to load icon: %s\n", path);
+            exit(-1);
+        }
+        
+
+        return image;
+    }
+
 
 
 

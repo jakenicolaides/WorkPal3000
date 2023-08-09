@@ -40,7 +40,7 @@ namespace EngineUI {
     int robotWaveStage = 0;
 
     static int soundFileIndex = 0;
-    const char* soundFileNames[] = { "none", "white-noise.wav", "brown-noise.mp3", "rainy-window.wav", "ocean-waves.mp3", "cafe.wav", "woodland.wav", "air-conditioner.wav" };
+    const char* soundFileNames[] = { "none", "white-noise.wav", "brown-noise.wav", "rainy-window.wav", "ocean-waves.mp3", "cafe.mp3", "woodland.wav", "air-conditioner.wav" };
 
     
 
@@ -316,7 +316,9 @@ namespace EngineUI {
                 std::ofstream outFile("userdata.json");
                 if (outFile.is_open()) outFile << userData;
             }
+            ImGui::SetNextItemWidth(300);
             ImGui::Combo("Ambient Sound", &soundFileIndex, soundFileNames, IM_ARRAYSIZE(soundFileNames));
+            ImGui::SetNextItemWidth(300);
             if (ImGui::InputInt("Minutes to Idle", &WorkPal3000::idleDuration)) {
                 // If the value was modified, we clamp it
                 WorkPal3000::idleDuration = std::clamp(WorkPal3000::idleDuration, 1, 1440);
@@ -343,7 +345,7 @@ namespace EngineUI {
             }
 
             if (WorkPal3000::playIntervalSounds) {
-
+                ImGui::SetNextItemWidth(300);
                 if (ImGui::InputInt("Interval Duration", &WorkPal3000::intervalDuration)) {
                     // If the value was modified, we clamp it
                     WorkPal3000::intervalDuration = std::clamp(WorkPal3000::intervalDuration, 1, 1440);
@@ -362,7 +364,7 @@ namespace EngineUI {
             
             
 
-            ImGui::Dummy(ImVec2(0, 200));
+            ImGui::Dummy(ImVec2(0, 315));
             std::string versionId = "WorkPal3000 V" + WorkPal3000::version;
             ImGui::Text(versionId.c_str());
             ImGui::Dummy(ImVec2(0, 20));

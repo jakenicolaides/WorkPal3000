@@ -175,6 +175,8 @@
     <ClInclude Include="implot.h" />
     <ClInclude Include="implot_internal.h" />
     <ClInclude Include="Rendering.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="Vendors\IMGUIZMO\ImZoomSlider.h" />
     <ClInclude Include="Vendors\IMGUI\imconfig.h" />
     <ClInclude Include="Vendors\IMGUI\imgui.h" />
@@ -187,6 +189,12 @@
     <ClInclude Include="Vendors\TINYGLTF\stb_image_write.h" />
     <ClInclude Include="Vendors\TINYGLTF\tiny_gltf.h" />
     <ClInclude Include="WorkPal3000.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WorkPal3000.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

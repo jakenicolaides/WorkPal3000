@@ -206,6 +206,7 @@ namespace Rendering {
    
     void updateCamera(GLFWwindow* window, float deltaTime);
     void flashWindowsEx();
+    GLFWimage load_icon(const char* path);
     void intersectRayWithRenderedModels(glm::vec3 rayOrigin, glm::vec3 rayDirection, int modelIndex, int& foundIntersects, glm::mat4 modelMatrix);
     void objectPicker();
     void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);

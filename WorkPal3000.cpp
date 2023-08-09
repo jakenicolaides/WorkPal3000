@@ -824,13 +824,12 @@ namespace WorkPal3000 {
     }
 }
 
-
-
 int main()
 {
-    
-   //ShowWindow(GetConsoleWindow(), SW_HIDE);
 
+
+  
+   //ShowWindow(GetConsoleWindow(), SW_HIDE);
    WorkPal3000::setup();
    Rendering::start();
    atexit(WorkPal3000::clearHostsFile);
