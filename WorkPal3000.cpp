@@ -20,9 +20,9 @@ namespace WorkPal3000 {
     std::string ambientSoundFile = "none";
     std::string currentlyPlayingAmbientSoundFile = "none";
     std::mutex ambientSoundMutex;
-    int idleDuration = 1;
-    int intervalDuration = 1;
-    bool playIntervalSounds = true;
+    int idleDuration = 5;
+    int intervalDuration = 60;
+    bool playIntervalSounds = false;
 
     //Private variables
     std::chrono::duration<double> elapsedTime;
@@ -613,9 +613,7 @@ namespace WorkPal3000 {
                     std::cout << "Received token: " << application_key << "\nUsername: " << name << std::endl;
                     // Handle successful authentication here
 
-                    std::string filename = "userdata.json"; // The file where the data will be stored
-                    nlohmann::json userData;
-
+                
                     //Get the current date
                     auto now = std::chrono::system_clock::now();
                     auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -625,14 +623,16 @@ namespace WorkPal3000 {
                     oss << std::put_time(&tm, "%Y-%m-%d");
                     currentDate = oss.str();
 
-
+                    //Open userdata file
+                    nlohmann::json userData;
                     userData["name"] = name;
                     userData["application_key"] = application_key;
 
                     // Write the data to the file
-                    std::ofstream outFile(filename);
+                    std::ofstream outFile("userdata.json");
                     if (outFile.is_open()) {
                         outFile << userData;
+                        outFile.flush();
                         validateSubscription(application_key.c_str());
                         needsOneTimeSetup = false;
                         EngineUI::initUI();
@@ -641,6 +641,7 @@ namespace WorkPal3000 {
                     else {
                         std::cerr << "Error: Unable to open file for writing.\n";
                     }
+                    
 
                 }
                 else if (jsonResponse.contains("error")) {
@@ -826,15 +827,12 @@ namespace WorkPal3000 {
 
 int main()
 {
-
-
   
-   //ShowWindow(GetConsoleWindow(), SW_HIDE);
-   WorkPal3000::setup();
-   Rendering::start();
-   atexit(WorkPal3000::clearHostsFile);
-  
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+    WorkPal3000::setup();
+    Rendering::start();
+    atexit(WorkPal3000::clearHostsFile);
    
-   return 0;
+    return 0;
 
 }

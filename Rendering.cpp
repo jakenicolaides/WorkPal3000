@@ -219,7 +219,7 @@ namespace Rendering {
 
     }
     void initVulkan() {
-       
+        
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -312,6 +312,8 @@ namespace Rendering {
     }
 
     void mainLoop() {
+
+ 
 
         bool applicationOpen = true;
         bool isQuestConnected = false;
@@ -1845,14 +1847,12 @@ namespace Rendering {
         GLFWimage image;
         int channels;
 
-        
         // Load the image
         image.pixels = stbi_load(path, &image.width, &image.height, &channels, 4); // 4 for RGBA
         if (!image.pixels) {
             fprintf(stderr, "Failed to load icon: %s\n", path);
             exit(-1);
         }
-        
 
         return image;
     }

@@ -52,7 +52,7 @@ namespace EngineUI {
         else if (!WorkPal3000::subscriptionActive) {
             windowState["showSubscription"] = true;
         }else{
-            windowState["showDemoWindow"] = true;
+            windowState["showDemoWindow"] = false;
             windowState["showBlockList"] = true;
             windowState["showStats"] = true;
             windowState["showSettings"] = true;
@@ -316,10 +316,12 @@ namespace EngineUI {
                 std::ofstream outFile("userdata.json");
                 if (outFile.is_open()) outFile << userData;
             }
-            ImGui::SetNextItemWidth(300);
+            ImGui::SetNextItemWidth(200);
+            ImGui::Dummy(ImVec2(0, 10));
             ImGui::Combo("Ambient Sound", &soundFileIndex, soundFileNames, IM_ARRAYSIZE(soundFileNames));
-            ImGui::SetNextItemWidth(300);
-            if (ImGui::InputInt("Minutes to Idle", &WorkPal3000::idleDuration)) {
+            ImGui::Dummy(ImVec2(0, 10));
+            ImGui::SetNextItemWidth(200);
+            if (ImGui::InputInt("Idle Timer (minutes)", &WorkPal3000::idleDuration)) {
                 // If the value was modified, we clamp it
                 WorkPal3000::idleDuration = std::clamp(WorkPal3000::idleDuration, 1, 1440);
                 //save changes
@@ -331,7 +333,7 @@ namespace EngineUI {
                 std::ofstream outFile("userdata.json");
                 if (outFile.is_open()) outFile << userData;
             }
-
+            ImGui::Dummy(ImVec2(0, 10));
             if (ImGui::Checkbox("Play Interval Sounds", &WorkPal3000::playIntervalSounds)) {
 
                 //save changes
@@ -343,10 +345,10 @@ namespace EngineUI {
                 std::ofstream outFile("userdata.json");
                 if (outFile.is_open()) outFile << userData;
             }
-
+            ImGui::Dummy(ImVec2(0, 10));
             if (WorkPal3000::playIntervalSounds) {
-                ImGui::SetNextItemWidth(300);
-                if (ImGui::InputInt("Interval Duration", &WorkPal3000::intervalDuration)) {
+                ImGui::SetNextItemWidth(200);
+                if (ImGui::InputInt("Interval Timer (minutes) ", &WorkPal3000::intervalDuration)) {
                     // If the value was modified, we clamp it
                     WorkPal3000::intervalDuration = std::clamp(WorkPal3000::intervalDuration, 1, 1440);
 
@@ -361,11 +363,21 @@ namespace EngineUI {
 
                 }
             }
-            
-            
 
-            ImGui::Dummy(ImVec2(0, 315));
+            float remainingSpace = ImGui::GetContentRegionAvail().y;
             std::string versionId = "WorkPal3000 V" + WorkPal3000::version;
+            
+            // Calculate the space you need for the controls you want at the bottom
+            float knownContentHeight =
+                ImGui::CalcTextSize(versionId.c_str()).y +
+                ImGui::CalcTextSize("For bugs, support or anything else:").y +
+                ImGui::GetTextLineHeight() +  // Assuming InputText height is roughly a single line of text
+                20 + 5; // Adding space from the Dummies
+            float dummyHeight = remainingSpace - knownContentHeight;
+            ImGui::Dummy(ImVec2(0, dummyHeight - 30));
+
+
+           
             ImGui::Text(versionId.c_str());
             ImGui::Dummy(ImVec2(0, 20));
             char buf[256] = "support@workpal3000.com";
