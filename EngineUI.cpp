@@ -238,7 +238,8 @@ namespace EngineUI {
 
             ImVec4* colors = style.Colors;
             colors[ImPlotCol_Line] = IMPLOT_AUTO_COL;
-            colors[ImPlotCol_Fill] = IMPLOT_AUTO_COL;
+            colors[ImPlotCol_Fill] = ImVec4(1.0f, 0.843f, 0.0f, 1.0f);
+           ;
             colors[ImPlotCol_MarkerOutline] = IMPLOT_AUTO_COL;
             colors[ImPlotCol_MarkerFill] = IMPLOT_AUTO_COL;
 
@@ -249,31 +250,62 @@ namespace EngineUI {
            
            
             if (statsWeekView) {
-
-
-                static const char* weekGlabels[] = { "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-                static const double weekPositions[] = { 0, 1,2,3,4,5,6 };
+                static const char* weekGlabels[] = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+                static const double weekPositions[] = { 0, 1, 2, 3, 4, 5, 6 };
                 static int weekGroups = 7;
-                if (ImPlot::BeginPlot("This Week", ImVec2(-1,475))) {
+
+                if (ImPlot::BeginPlot("This Week", ImVec2(-1, 475))) {
                     ImPlot::SetupAxes("Day of Week", "Hours", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
                     ImPlot::SetupAxisTicks(ImAxis_X1, weekPositions, weekGroups, weekGlabels);
-                    ImPlot::PlotBars("", weekData, 7, 0.7, 0);
+
+                    // Plot each bar individually to set custom colors
+                    for (int i = 0; i < weekGroups; i++) {
+                        ImVec4 barColor = ImVec4(1.0, 1.0, 1.0, 1.0); // Default color
+
+                        // Assign color based on hours
+                        if (weekData[i] >= 13.0) barColor = ImVec4(0.576, 0.882, 1.0, 1.0); // Platinum
+                        else if (weekData[i] >= 12.0) barColor = ImVec4(1.0, 0.816, 0.137, 1.0); // Gold
+                        else if (weekData[i] >= 10.0) barColor = ImVec4(0.75, 0.75, 0.75, 1.0); // Silver
+                        else if (weekData[i] >= 8.0) barColor = ImVec4(0.6, 0.4, 0.2, 1.0); // Brown 
+
+                        ImPlot::PushStyleColor(ImPlotCol_Fill, barColor);
+                        ImPlot::PlotBars("", &weekData[i], 1, 0.7, i);
+                        ImPlot::PopStyleColor();
+                    }
+
                     ImPlot::EndPlot();
                 }
             }
 
             //Month Plot
             if (statsMonthView) {
-                static const char* monthGlabels[] = { "21","22","23","Current" };
-                static const double monthPositions[] = { 0,1,2,3 };
+                static const char* monthGlabels[] = { "-3", "-2 ", "-1", "Current" };
+                static const double monthPositions[] = { 0, 1, 2, 3 };
                 static int monthGroups = 4;
+
                 if (ImPlot::BeginPlot("Last Four Weeks", ImVec2(-1, 475))) {
                     ImPlot::SetupAxes("Week Number", "Hours", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
                     ImPlot::SetupAxisTicks(ImAxis_X1, monthPositions, monthGroups, monthGlabels);
-                    ImPlot::PlotBars("", monthData, 4, 0.5, 0);
+
+                    // Plot each bar individually to set custom colors
+                    for (int i = 0; i < monthGroups; i++) {
+                        ImVec4 barColor = ImVec4(1.0, 1.0, 1.0, 1.0); // Default color
+
+                        // Assign color based on hours
+                        if (monthData[i] >= 13.0 * 5.0) barColor = ImVec4(0.9, 0.9, 0.9, 1.0); // Platinum, assuming 13 hours per day over a week
+                        else if (monthData[i] >= 12.0 * 5.0) barColor = ImVec4(1.0, 0.843, 0.0, 1.0); // Gold, assuming 12 hours per day over a week
+                        else if (monthData[i] >= 10.0 * 5.0) barColor = ImVec4(0.75, 0.75, 0.75, 1.0); // Silver, assuming 10 hours per day over a week
+                        else if (monthData[i] >= 8.0 * 5.0) barColor = ImVec4(0.6, 0.4, 0.2, 1.0); // Brown, assuming 8 hours per day over a week
+
+                        ImPlot::PushStyleColor(ImPlotCol_Fill, barColor);
+                        ImPlot::PlotBars("", &monthData[i], 1, 0.5, i); // Note the width of 0.5 to match the original month view settings
+                        ImPlot::PopStyleColor();
+                    }
+
                     ImPlot::EndPlot();
                 }
             }
+
 
 
             //Year Plot
